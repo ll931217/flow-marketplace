@@ -1,0 +1,45 @@
+{
+  "$schema": "https://claude.ai/code/schemas/mcp/v1.json",
+  "id": "semantic-memory",
+  "name": "Semantic Memory",
+  "version": "1.0.0",
+  "description": "PostgreSQL + pgvector MCP server for codebase indexing and semantic search",
+  "author": "flow-community",
+  "license": "MIT",
+  "type": "mcp-server",
+  "entry": "mcp-server/dist/index.js",
+  "runtime": "node",
+  "environment": {
+    "SEMANTIC_MEMORY_PG_URL": {
+      "description": "PostgreSQL connection URL",
+      "default": "postgresql://localhost/semantic_memory",
+      "required": true
+    },
+    "SEMANTIC_MEMORY_EMBEDDING_MODEL": {
+      "description": "HuggingFace sentence-transformers model name",
+      "default": "all-MiniLM-L6-v2",
+      "required": false
+    },
+    "SEMANTIC_MEMORY_CHUNK_SIZE": {
+      "description": "Maximum tokens per chunk when indexing",
+      "default": "500",
+      "required": false
+    }
+  },
+  "dependencies": {
+    "node": ">=18.0.0",
+    "python": ">=3.10",
+    "postgresql": ">=14.0 with pgvector extension"
+  },
+  "install": {
+    "script": "scripts/install.sh",
+    "postinstall": "npm run build"
+  },
+  "tools": [
+    "semantic_search",
+    "index_project",
+    "get_project_status",
+    "delete_project",
+    "list_projects"
+  ]
+}
