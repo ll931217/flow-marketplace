@@ -1,0 +1,125 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g., 1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Releasing version: $VERSION"
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          NOTES=$(sed -n "/## \[$VERSION\]/,/^## /p" CHANGELOG.md | head -n -1)
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: v${{ steps.version.outputs.version }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: false
+
+  build-and-publish:
+    name: Build and Verify
+    runs-on: ubuntu-latest
+    needs: create-release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Semantic Memory MCP Server
+        working-directory: .claude-plugin/plugins/semantic-memory/mcp-server
+        run: |
+          npm ci
+          npm run build
+
+      - name: Verify Build Artifacts
+        run: |
+          if [ -f ".claude-plugin/plugins/semantic-memory/mcp-server/dist/index.js" ]; then
+            echo "✓ Build successful"
+            ls -lh .claude-plugin/plugins/semantic-memory/mcp-server/dist/
+          else
+            echo "✗ Build failed"
+            exit 1
+          fi
+
+      - name: Create Archive
+        run: |
+          tar -czf flow-marketplace-${{ steps.version.outputs.version }}.tar.gz \
+            .claude-plugin/ \
+            README.md \
+            CHANGELOG.md \
+            LICENSE \
+            --exclude='*.log' \
+            --exclude='node_modules' \
+            --exclude='dist'
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./flow-marketplace-${{ steps.version.outputs.version }}.tar.gz
+          asset_name: flow-marketplace-${{ steps.version.outputs.version }}.tar.gz
+          asset_content_type: application/gzip
+
+  publish-notification:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    needs: [create-release, build-and-publish]
+    if: success()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Release Summary
+        run: |
+          echo "# Release ${{ github.ref_name }} created successfully! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Installation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "claude plugin install https://github.com/flow-community/flow-marketplace" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

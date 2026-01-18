@@ -1,0 +1,43 @@
+# Labeler Configuration
+# Automatically labels PRs based on changed files
+
+documentation:
+  - "**/*.md"
+  - "**/docs/**"
+
+dependencies:
+  - "package.json"
+  - "package-lock.json"
+  - "**/package.json"
+
+ci/cd:
+  - ".github/workflows/**"
+
+flow-plugin:
+  - ".claude-plugin/plugins/flow/**"
+
+semantic-memory:
+  - ".claude-plugin/plugins/semantic-memory/**"
+
+mcp-server:
+  - ".claude-plugin/plugins/semantic-memory/mcp-server/**"
+
+bug:
+  - "**/fix/**"
+  - "**/*fix*"
+
+feature:
+  - "**/feat/**"
+  - "**/*feature*"
+
+refactor:
+  - "**/refactor/**"
+  - "**/*refactor*"
+
+tests:
+  - "**/*test*"
+  - "**/*spec*"
+
+security:
+  - "**/*security*"
+  - "**/*auth*"

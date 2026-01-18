@@ -1,0 +1,32 @@
+# Code Owners File
+# https://help.github.com/articles/about-codeowners/
+
+# Default code owners
+* @flow-community/maintainers
+
+# Flow Plugin
+.claude-plugin/plugins/flow/** @flow-community/flow-team
+
+# Semantic Memory Plugin
+.claude-plugin/plugins/semantic-memory/** @flow-community/semantic-memory-team
+
+# MCP Server
+.claude-plugin/plugins/semantic-memory/mcp-server/** @flow-community/mcp-team
+
+# GitHub Actions
+.github/workflows/** @flow-community/ci-team
+
+# Documentation
+*.md @flow-community/docs-team
+
+# Security
+SECURITY.md @flow-community/security-team
+.security/** @flow-community/security-team
+
+# Dependencies
+package.json @flow-community/dependency-team
+**/package-lock.json @flow-community/dependency-team
+
+# Release management
+CHANGELOG.md @flow-community/release-team
+.github/workflows/release.yml @flow-community/release-team

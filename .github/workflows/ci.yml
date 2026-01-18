@@ -1,0 +1,172 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  validate-marketplace:
+    name: Validate Marketplace Manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate JSON
+        run: |
+          jq empty .claude-plugin/marketplace.json || exit 1
+          echo "✓ marketplace.json is valid JSON"
+
+      - name: Validate Plugin JSONs
+        run: |
+          for file in .claude-plugin/plugins/*/plugin.json .claude-plugin/plugins/*/.mcp.json; do
+            if [ -f "$file" ]; then
+              jq empty "$file" || exit 1
+              echo "✓ $file is valid JSON"
+            fi
+          done
+
+  validate-flow:
+    name: Validate Flow Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Flow Commands
+        run: |
+          for cmd in plan generate-tasks implement autonomous cleanup summary README; do
+            if [ -f ".claude-plugin/plugins/flow/commands/flow/$cmd.md" ]; then
+              echo "✓ flow:$cmd exists"
+            else
+              echo "✗ flow:$cmd missing"
+              exit 1
+            fi
+          done
+
+      - name: Check Decision Engine Skill
+        run: |
+          if [ -f ".claude-plugin/plugins/flow/skills/decision-engine/SKILL.md" ]; then
+            echo "✓ decision-engine skill exists"
+          else
+            echo "✗ decision-engine skill missing"
+            exit 1
+          fi
+
+  validate-semantic-memory:
+    name: Validate Semantic Memory Plugin
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: .claude-plugin/plugins/semantic-memory/mcp-server/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: .claude-plugin/plugins/semantic-memory/mcp-server
+        run: npm ci
+
+      - name: Type Check
+        working-directory: .claude-plugin/plugins/semantic-memory/mcp-server
+        run: npx tsc --noEmit
+
+      - name: Build
+        working-directory: .claude-plugin/plugins/semantic-memory/mcp-server
+        run: npm run build
+
+      - name: Verify Build Output
+        run: |
+          if [ -f ".claude-plugin/plugins/semantic-memory/mcp-server/dist/index.js" ]; then
+            echo "✓ MCP server built successfully"
+          else
+            echo "✗ MCP server build failed"
+            exit 1
+          fi
+
+  check-scripts:
+    name: Check Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Check Scripts
+        run: |
+          for script in $(find . -name "*.sh" -type f); do
+            shellcheck "$script" || exit 1
+            echo "✓ $script passes ShellCheck"
+          done
+
+  lint-markdown:
+    name: Lint Markdown
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Markdown Lint
+        run: npm install -g markdownlint-cli
+
+      - name: Lint Markdown Files
+        run: |
+          markdownlint '**/*.md' --ignore node_modules --ignore dist
+          echo "✓ Markdown files linted"
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run npm audit
+        working-directory: .claude-plugin/plugins/semantic-memory/mcp-server
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  verify-structure:
+    name: Verify Repository Structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check Required Files
+        run: |
+          required_files=(
+            "README.md"
+            "CHANGELOG.md"
+            "LICENSE"
+            ".claude-plugin/marketplace.json"
+            ".gitignore"
+            ".github/PULL_REQUEST_TEMPLATE.md"
+          )
+
+          for file in "${required_files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "✓ $file exists"
+            else
+              echo "✗ $file missing"
+              exit 1
+            fi
+          done

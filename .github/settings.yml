@@ -1,0 +1,71 @@
+# Repository Settings for Flow Marketplace
+# Apply with: gh repo edit --yaml-file .github/settings.yml
+
+# Basic settings
+repository:
+  name: flow-marketplace
+  description: Claude Code Plugin Marketplace hosting Flow workflow system and Semantic Memory MCP server
+  homepage: https://flow.dev
+  topics: claude-code, claude, plugin, marketplace, flow, semantic-search, mcp, pgvector
+  private: false
+  has_issues: true
+  has_projects: false
+  has_wiki: false
+  has_downloads: false
+
+# Security and analysis
+security:
+  enabled: true
+  dependency_graph: true
+  secret_scanning: true
+  secret_scanning_push_protection: true
+  advanced_security: false
+
+# Features
+features:
+  actions: true
+  discussions: true
+  packages: false
+  pages: false
+
+# Labels (auto-created on first issue/PR)
+labels:
+  - name: bug
+    color: d73a4a
+    description: Something isn't working
+  - name: enhancement
+    color: a2eeef
+    description: New feature or request
+  - name: documentation
+    color: 0075ca
+    description: Improvements or additions to documentation
+  - name: question
+    color: d876e3
+    description: Further information is requested
+  - name: security
+    color: ee0701
+    description: Security vulnerability or concern
+  - name: dependencies
+    color: 0366d6
+    description: Pull requests that update a dependency file
+  - name: flow-plugin
+    color: 5319e7
+    description: Related to Flow plugin
+  - name: semantic-memory
+    color: 0e8a16
+    description: Related to Semantic Memory plugin
+  - name: mcp-server
+    color: 1d76db
+    description: Related to MCP server
+  - name: good first issue
+    color: 7057ff
+    description: Good for newcomers
+  - name: help wanted
+    color: 008672
+    description: Extra attention is needed
+  - name: wontfix
+    color: ffffff
+    description: This will not be worked on
+  - name: duplicate
+    color: cfd3d7
+    description: This issue or pull request already exists
