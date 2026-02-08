@@ -171,6 +171,77 @@ To cleanup the feature:
 /flow:cleanup
 ```
 
+## Flow Plugin Documentation
+
+### Quick Start
+
+**Autonomous Mode (Recommended):**
+```
+/flow:autonomous "Implement user authentication"
+```
+
+**Manual Mode:**
+```
+1. Plan your feature    → /flow:plan       (Generate PRD)
+2. Generate tasks       → /flow:generate-tasks  (Create tasks)
+3. Implement            → /flow:implement  (Execute tasks)
+4. Cleanup              → /flow:cleanup    (Finalize)
+```
+
+### PRD Status Flow
+
+```
+draft → approved → implementing → implemented
+```
+
+| Status | Icon | Description |
+|--------|------|-------------|
+| `draft` | 📝 | PRD being written |
+| `approved` | ✅ | Ready for task generation |
+| `implementing` | 🔄 | Tasks in progress |
+| `implemented` | ✨ | Feature complete |
+
+### Command Reference
+
+| Command | Purpose | PRD Status | Output |
+|---------|---------|------------|--------|
+| `/flow:autonomous` | End-to-end autonomous | N/A | Complete feature |
+| `/flow:plan` | Create/update PRD | Any | PRD file |
+| `/flow:generate-tasks` | Generate tasks | approved | Epics + tasks |
+| `/flow:implement` | Execute tasks | approved→implementing | Code + commits |
+| `/flow:summary` | Show progress | Any | Status summary |
+| `/flow:cleanup` | Finalize | implementing | Merge + status |
+
+### Architecture
+
+The Maestro Orchestrator (`/flow:autonomous`) provides end-to-end autonomy:
+- Session lifecycle management
+- Phase orchestration (plan → tasks → implement → cleanup)
+- Autonomous technical decision-making
+- Error recovery with rollback capability
+
+**Agent Skills:** frontend-design, mcp-builder, webapp-testing, security-review, tdd-workflow
+
+### Optional Tools
+
+**Beads (bd)** - Enhanced task tracking with dependencies:
+```bash
+curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
+```
+
+**Worktrunk (wt)** - Git worktree management:
+```bash
+brew install max-sixty/worktrunk/wt
+```
+
+### Advanced Topics
+
+- **PRD Iteration:** When updating an approved PRD, status resets to `draft`, version increments
+- **Auto-Compaction Detection:** System includes context refresh protocol
+- **Parallel Task Execution:** Tasks marked `[P:Group-X]` execute concurrently via specialized subagents
+
+For detailed protocol documentation, see `.claude-plugin/plugins/flow/commands/flow/shared/protocols/`
+
 ### Semantic Memory Plugin
 
 Index your codebase:
@@ -207,6 +278,8 @@ flow-marketplace/
 │       ├── flow/                  # Flow plugin
 │       │   ├── plugin.json        # Flow plugin manifest
 │       │   ├── commands/flow/     # Flow commands
+│       │   │   └── shared/
+│       │   │       └── protocols/ # Core operational logic
 │       │   ├── skills/            # Decision engine skill
 │       │   └── subagent-types.yaml
 │       └── semantic-memory/       # Semantic memory MCP plugin
@@ -265,7 +338,20 @@ MIT License - see LICENSE file for details
 
 ## See Also
 
-- [Flow Workflow Documentation](./.claude-plugin/plugins/flow/commands/flow/README.md)
+**Flow Commands** - Individual command documentation in `.claude-plugin/plugins/flow/commands/flow/`
+- `/flow:plan` - PRD generation
+- `/flow:generate-tasks` - Task generation from PRDs
+- `/flow:implement` - Task execution workflow
+- `/flow:cleanup` - Post-implementation cleanup
+- `/flow:summary` - Progress display
+- `/flow:autonomous` - Full autonomous orchestration
+
+**Flow Protocols** - Core operational logic in `.claude-plugin/plugins/flow/commands/flow/shared/protocols/`
+- PRD Auto-Discovery
+- Auto-Compaction Detection
+- PRD Change Management
+- TDD Principles
+
 - [Claude Code Documentation](https://claude.ai/code)
 - [Beads Issue Tracker](https://github.com/steveyegge/beads)
 - [Worktrunk](https://worktrunk.dev/)

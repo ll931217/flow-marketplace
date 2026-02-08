@@ -359,14 +359,11 @@ Tasks marked with `[P:Group-X]` execute concurrently via specialized subagents:
 - Database tasks → `database-admin`
 - Testing tasks → `test-automator`
 
-See `shared/examples/session-implement.md` for examples.
-
 ## Getting Help
 
 Each command file includes:
 - Quick-start header (5 lines)
 - Detailed process documentation
 - References to shared protocols
-- Example sessions in `shared/examples/`
 
 For specific workflow details, see the individual command files or the shared protocols directory.

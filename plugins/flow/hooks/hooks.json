@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Save current flow state to TMPDIR before compaction:\n\n1. Check if autonomous mode is running: read $TMPDIR/flow-marketplace/state.json\n2. If autonomous mode active:\n   - Save session metadata to $TMPDIR/flow-marketplace/session.json\n   - Save beads issue ID (if using beads) to state.json\n   - Call /flow:summary to preserve context\n3. If using beads (not autonomous): save issue ID to state.json\n4. Write state.json with: { mode: 'autonomous'|'manual', beads_issue_id: string|null, timestamp: ISO }",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "session_type == 'compact'",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Restore flow state after compaction:\n\n1. Read $TMPDIR/flow-marketplace/state.json\n2. If state.json exists and mode == 'autonomous':\n   - Notify user: \"Autonomous session was interrupted by compaction. Session restored from checkpoint.\"\n   - Suggest: \"Run /flow:summary for full context refresh\"\n3. If state.json exists and beads_issue_id is set:\n   - Notify user: \"Beads issue tracking preserved. Issue ID: {beads_issue_id}\"\n4. Continue workflow based on restored state",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -47,7 +47,8 @@ Guidelines for managing task lists to track progress on completing a PRD.
 
 **Task Management Options:**
 
-- **With beads (`bd`) installed:** Full-featured task tracking with dependencies, ready task detection, and persistent storage. See `shared/templates/beads-warning.md` for installation guidance.
+- **With beads (`bd`) installed:** Full-featured task tracking with dependencies, ready task detection, and persistent storage.
+  **Installation:** `curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash`
 - **Without beads:** Basic task tracking using the internal TodoWrite tool (limited features, no persistent storage)
 
 ## Current Status

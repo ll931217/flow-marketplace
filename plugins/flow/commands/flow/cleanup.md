@@ -609,10 +609,10 @@ If any safety check fails, the AI will:
 
 ## Example Session
 
-See `shared/examples/session-cleanup.md` for complete session transcripts showing:
-- Example with worktree merge
-- Example without worktree (main repo)
-- Error handling scenarios
+**Cleanup Scenarios:**
+- With worktree: Prompts for merge confirmation, handles worktree removal
+- Without worktree: Direct commit in main repository
+- Error handling: Incomplete tasks blocked, merge conflicts detected, uncommitted changes warned
 
 **Example with Worktree Merge:**
 

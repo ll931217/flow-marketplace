@@ -334,6 +334,27 @@ All Maestro state is persisted in `.flow/maestro/`:
 }
 ```
 
+### State Persistence
+
+Autonomous mode persists state across compaction using `$TMPDIR/flow-marketplace/`:
+
+**Before compaction (PreCompact hook):**
+- Save session metadata to `$TMPDIR/flow-marketplace/session.json`
+- Save current phase and decisions to `$TMPDIR/flow-marketplace/state.json`
+- Call `/flow:summary` for context preservation
+
+**After compaction (SessionStart hook):**
+- Read `$TMPDIR/flow-marketplace/state.json`
+- Detect if autonomous mode was active
+- Notify user of session restoration
+- Resume from last checkpoint
+
+**State cleanup:**
+- State cleared after `/flow:cleanup` completes
+- Directory structure preserved for next session
+
+For detailed state management protocol, see `shared/protocols/state-management.md`
+
 ## Subagent Coordination
 
 Maestro auto-detects and delegates to specialized subagents:

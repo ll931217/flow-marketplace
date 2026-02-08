@@ -36,14 +36,16 @@ To guide an AI assistant in creating a detailed Product Requirements Document (P
     - If `wt` is missing, the AI will use native git worktree commands.
     - If `bd` is missing, the AI will use the internal TodoWrite tool for task tracking.
 
-**Beads Installation:** See `shared/templates/beads-warning.md` for installation guidance and benefits.
+**Beads Installation (optional):**
+```bash
+curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
+```
+Benefits: Persistent task storage, dependency tracking, progress visibility
 
 2.  **Verify Git Worktree:** Before proceeding, check if the current directory is a Git worktree. If it is not a worktree, warn the user and offer options.
     - **Warning message should include:**
       - An explanation that PRDs are best created in isolated worktrees for better branch/feature management.
     - **Use AskUserQuestion to offer 3 choices:**
-
-      See `shared/templates/ask-user-questions.md` for the Worktree Selection Prompt template.
 
       - **If user selects "Create worktree":**
         The AI will:
@@ -583,8 +585,6 @@ need more details:
 **7b. Request Approval:**
 
 - **Use AskUserQuestion to request approval:**
-
-See `shared/templates/ask-user-questions.md` for the PRD Approval Workflow template.
 
 **Response handling:**
 - **"Yes, approve"**:
