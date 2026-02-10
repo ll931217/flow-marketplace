@@ -46,13 +46,13 @@ PostgreSQL + pgvector MCP server for codebase indexing and semantic search. Inde
 Install both plugins with a single command:
 
 ```bash
-claude plugin install https://github.com/flow-community/flow-marketplace
+claude plugin install https://github.com/ll931217/flow-marketplace
 ```
 
 Or use the `/plugin` command within Claude Code:
 
 ```
-/plugin install https://github.com/flow-community/flow-marketplace
+/plugin install https://github.com/ll931217/flow-marketplace
 ```
 
 ### What Happens During Installation
@@ -333,7 +333,7 @@ MIT License - see LICENSE file for details
 
 ## Support
 
-- GitHub Issues: [flow-marketplace/issues](https://github.com/flow-community/flow-marketplace/issues)
+- GitHub Issues: [flow-marketplace/issues](https://github.com/ll931217/flow-marketplace/issues)
 - Documentation: See individual plugin README files
 
 ## See Also
