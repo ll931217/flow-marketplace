@@ -1,7 +1,7 @@
 # Flow Marketplace
 
-[![CI](https://github.com/flow-community/flow-marketplace/workflows/CI/badge.svg)](https://github.com/flow-community/flow-marketplace/actions/workflows/ci.yml)
-[![Release](https://github.com/flow-community/flow-marketplace/workflows/Release/badge.svg)](https://github.com/flow-community/flow-marketplace/actions/workflows/release.yml)
+[![CI](https://github.com/ll931217/flow-marketplace/workflows/CI/badge.svg)](https://github.com/ll931217/flow-marketplace/actions/workflows/ci.yml)
+[![Release](https://github.com/ll931217/flow-marketplace/workflows/Release/badge.svg)](https://github.com/ll931217/flow-marketplace/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Compatible-blue)](https://claude.ai/code)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-green)](https://modelcontextprotocol.io)
