@@ -1,132 +1,36 @@
 {
-  "$schema": "https://claude.ai/code/schemas/marketplace/v1.json",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "flow-marketplace",
-  "version": "1.0.0",
   "description": "Plugin marketplace for Claude Code hosting Flow workflow system and Semantic Memory MCP server",
-  "author": {
-    "name": "flow-community",
-    "email": "community@flow.dev"
+  "owner": {
+    "name": "Liang-Shih Lin",
+    "email": "liangshihlin@gmail.com"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/flow-community/flow-marketplace"
-  },
-  "homepage": "https://github.com/flow-community/flow-marketplace#readme",
-  "bugs": {
-    "url": "https://github.com/flow-community/flow-marketplace/issues"
-  },
-  "license": "MIT",
   "plugins": [
     {
-      "id": "flow-plugin",
-      "name": "Flow Plugin",
-      "version": "1.0.0",
+      "name": "flow",
       "description": "Complete PRD-based workflow system with autonomous orchestration for Claude Code",
-      "required": true,
-      "dependencies": {
-        "plugins": [],
-        "external": {
-          "beads": {
-            "description": "Issue tracking system (optional but recommended)",
-            "required": false,
-            "url": "https://github.com/steveyegge/beads"
-          },
-          "worktrunk": {
-            "description": "Git worktree management (optional)",
-            "required": false,
-            "url": "https://worktrunk.dev/"
-          }
-        }
-      },
-      "commands": [
-        "flow:plan",
-        "flow:generate-tasks",
-        "flow:implement",
-        "flow:autonomous",
-        "flow:cleanup",
-        "flow:summary"
-      ],
-      "skills": [
-        "decision-engine"
+      "version": "1.0.0",
+      "source": "./plugins/flow",
+      "category": "productivity",
+      "tags": [
+        "prd",
+        "workflow",
+        "orchestration",
+        "planning"
       ]
     },
     {
-      "id": "semantic-memory",
-      "name": "Semantic Memory",
-      "version": "1.0.0",
+      "name": "semantic-memory-mcp",
       "description": "PostgreSQL + pgvector MCP server for codebase indexing and semantic search",
-      "required": false,
-      "mcpConfig": ".mcp.json",
-      "installScript": "scripts/install.sh",
-      "dependencies": {
-        "plugins": [],
-        "external": {
-          "postgresql": {
-            "description": "PostgreSQL 14+ with pgvector extension",
-            "required": true,
-            "version": ">=14.0",
-            "installUrl": "https://www.postgresql.org/download/",
-            "setupInstructions": [
-              "Install PostgreSQL 14+",
-              "Enable pgvector: CREATE EXTENSION vector;",
-              "Create database: createdb semantic_memory"
-            ]
-          },
-          "python": {
-            "description": "Python 3.10+ for sentence-transformers",
-            "required": true,
-            "version": ">=3.10",
-            "installUrl": "https://www.python.org/downloads/",
-            "setupInstructions": [
-              "Install Python 3.10+",
-              "Install dependencies: pip install sentence-transformers numpy"
-            ]
-          }
-        }
-      },
-      "mcpServers": [
-        {
-          "id": "semantic-memory",
-          "command": "node",
-          "args": [
-            "{pluginRoot}/mcp-server/dist/index.js"
-          ],
-          "env": {
-            "SEMANTIC_MEMORY_PG_URL": "{env:DATABASE_URL:-postgresql://localhost/semantic_memory}",
-            "SEMANTIC_MEMORY_EMBEDDING_MODEL": "{env:EMBEDDING_MODEL:-all-MiniLM-L6-v2}",
-            "SEMANTIC_MEMORY_CHUNK_SIZE": "{env:CHUNK_SIZE:-500}"
-          }
-        }
-      ],
-      "tools": [
-        {
-          "name": "semantic_search",
-          "description": "Search codebase using semantic similarity. Returns relevant code chunks with file paths, line ranges, and similarity scores."
-        },
-        {
-          "name": "index_project",
-          "description": "Index a project's codebase for semantic search. Processes all source files and generates embeddings."
-        },
-        {
-          "name": "get_project_status",
-          "description": "Get indexing status for a project including document count and last indexed date."
-        },
-        {
-          "name": "delete_project",
-          "description": "Delete a project and all its indexed documents from the database."
-        },
-        {
-          "name": "list_projects",
-          "description": "List all indexed projects with metadata including document count and last indexed date."
-        }
-      ],
-      "scripts": [
-        {
-          "name": "index-codebase",
-          "description": "Index the current codebase for semantic search",
-          "path": "scripts/index-codebase.sh",
-          "usage": "index-codebase [project_path]"
-        }
+      "version": "1.0.0",
+      "source": "./plugins/semantic-memory-mcp",
+      "category": "development",
+      "tags": [
+        "mcp",
+        "semantic-search",
+        "postgresql",
+        "embeddings"
       ]
     }
   ]
