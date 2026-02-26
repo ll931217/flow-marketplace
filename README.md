@@ -214,13 +214,19 @@ draft → approved → implementing → implemented
 
 ### Architecture
 
+Flow uses a **skills-based architecture** for context-efficient loading:
+- **Commands** (~20 lines) are thin wrappers that trigger skills
+- **Skills** (SKILL.md ~180 lines) contain the workflow overview
+- **References** (80-300 lines each) are loaded on-demand for specific steps
+- **Shared references** provide cross-skill protocols (PRD discovery, TDD, state management)
+
 The Maestro Orchestrator (`/flow:autonomous`) provides end-to-end autonomy:
 - Session lifecycle management
 - Phase orchestration (plan → tasks → implement → cleanup)
-- Autonomous technical decision-making
+- Autonomous technical decision-making via decision engine
 - Error recovery with rollback capability
 
-**Agent Skills:** frontend-design, mcp-builder, webapp-testing, security-review, tdd-workflow
+**Agent Skills:** decision-engine, frontend-design, mcp-builder, webapp-testing, document-skills
 
 ### Optional Tools
 
@@ -240,7 +246,7 @@ brew install max-sixty/worktrunk/wt
 - **Auto-Compaction Detection:** System includes context refresh protocol
 - **Parallel Task Execution:** Tasks marked `[P:Group-X]` execute concurrently via specialized subagents
 
-For detailed protocol documentation, see `.claude-plugin/plugins/flow/commands/flow/shared/protocols/`
+For detailed protocol documentation, see `plugins/flow/skills/shared/references/`
 
 ### Semantic Memory Plugin
 
@@ -273,32 +279,45 @@ get_project_status project_path="/path/to/project"
 ```
 flow-marketplace/
 ├── .claude-plugin/
-│   ├── marketplace.json           # Marketplace manifest
-│   └── plugins/
-│       ├── flow/                  # Flow plugin
-│       │   ├── plugin.json        # Flow plugin manifest
-│       │   ├── commands/flow/     # Flow commands
-│       │   │   └── shared/
-│       │   │       └── protocols/ # Core operational logic
-│       │   ├── skills/            # Decision engine skill
-│       │   └── subagent-types.yaml
-│       └── semantic-memory/       # Semantic memory MCP plugin
-│           ├── plugin.json        # Semantic memory plugin manifest
-│           ├── mcp-server/        # MCP server implementation
-│           │   ├── src/
-│           │   │   ├── index.ts   # MCP server entry point
-│           │   │   ├── database.ts
-│           │   │   ├── embedding.ts
-│           │   │   └── tools/
-│           │   │       ├── search.ts
-│           │   │       ├── index.ts
-│           │   │       └── manage.ts
-│           │   ├── scripts/
-│           │   │   └── embedding.py
-│           │   └── package.json
-│           └── scripts/
-│               └── index-codebase.sh
-├── package.json
+│   └── marketplace.json           # Marketplace manifest
+├── plugins/
+│   ├── flow/                      # Flow plugin
+│   │   ├── commands/              # Thin command wrappers (~20 lines each)
+│   │   │   ├── plan.md
+│   │   │   ├── generate-tasks.md
+│   │   │   ├── implement.md
+│   │   │   ├── autonomous.md
+│   │   │   ├── cleanup.md
+│   │   │   └── summary.md
+│   │   ├── skills/                # Skills with on-demand references
+│   │   │   ├── plan/              # PRD generation workflow
+│   │   │   │   ├── SKILL.md
+│   │   │   │   └── references/    # prerequisites, worktree, questions, template
+│   │   │   ├── generate-tasks/    # Task generation from PRD
+│   │   │   │   ├── SKILL.md
+│   │   │   │   └── references/    # task process, deps, testing, subagents
+│   │   │   ├── implement/         # Task execution with TDD
+│   │   │   │   ├── SKILL.md
+│   │   │   │   └── references/    # execution loop, parallel, delegation, errors
+│   │   │   ├── autonomous/        # Maestro orchestrator
+│   │   │   │   ├── SKILL.md
+│   │   │   │   └── references/    # phases, decisions, recovery, config, report
+│   │   │   ├── cleanup/           # Post-implementation cleanup
+│   │   │   │   ├── SKILL.md
+│   │   │   │   └── references/    # merge, tests, commits, docs
+│   │   │   ├── decision-engine/   # Autonomous technical decisions
+│   │   │   │   ├── SKILL.md
+│   │   │   │   └── references/    # rubric, patterns, ordering
+│   │   │   └── shared/            # Cross-skill protocols
+│   │   │       └── references/    # prd-discovery, tdd, state, compaction, autonomous-mode
+│   │   ├── hooks/
+│   │   │   └── hooks.json         # SessionStart, PreCompact, Stop hooks
+│   │   └── subagent-types.yaml    # Agent type mapping
+│   └── semantic-memory-mcp/       # Semantic memory MCP plugin
+│       ├── mcp-server/
+│       │   ├── src/
+│       │   └── package.json
+│       └── scripts/
 ├── README.md
 └── CHANGELOG.md
 ```
@@ -338,19 +357,21 @@ MIT License - see LICENSE file for details
 
 ## See Also
 
-**Flow Commands** - Individual command documentation in `.claude-plugin/plugins/flow/commands/flow/`
-- `/flow:plan` - PRD generation
-- `/flow:generate-tasks` - Task generation from PRDs
-- `/flow:implement` - Task execution workflow
-- `/flow:cleanup` - Post-implementation cleanup
-- `/flow:summary` - Progress display
-- `/flow:autonomous` - Full autonomous orchestration
+**Flow Skills** - Detailed workflow logic in `plugins/flow/skills/`
+- `plan/` - PRD generation workflow
+- `generate-tasks/` - Task generation from PRDs
+- `implement/` - Task execution with TDD enforcement
+- `autonomous/` - Maestro autonomous orchestrator
+- `cleanup/` - Post-implementation cleanup
+- `decision-engine/` - Autonomous technical decision-making
 
-**Flow Protocols** - Core operational logic in `.claude-plugin/plugins/flow/commands/flow/shared/protocols/`
+**Shared Protocols** - Cross-skill references in `plugins/flow/skills/shared/references/`
 - PRD Auto-Discovery
 - Auto-Compaction Detection
 - PRD Change Management
 - TDD Principles
+- State Management
+- Autonomous Mode Detection
 
 - [Claude Code Documentation](https://claude.ai/code)
 - [Beads Issue Tracker](https://github.com/steveyegge/beads)

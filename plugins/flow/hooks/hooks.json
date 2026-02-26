@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Save current flow state to TMPDIR before compaction:\n\n1. Check if autonomous mode is running: read $TMPDIR/flow-marketplace/state.json\n2. If autonomous mode active:\n   - Save session metadata to $TMPDIR/flow-marketplace/session.json\n   - Save beads issue ID (if using beads) to state.json\n   - Call /flow:summary to preserve context\n3. If using beads (not autonomous): save issue ID to state.json\n4. Preserve current_phase and prd_summary in state.json (critical for context reset after PRD approval)\n5. Write state.json with: { mode: 'autonomous'|'manual', beads_issue_id: string|null, current_phase: string, prd_summary: object|null, prd_path: string|null, timestamp: ISO }",
+            "prompt": "Save current flow state to TMPDIR before compaction:\n\n1. Check if autonomous mode is running: read $TMPDIR/flow-marketplace/state.json\n2. If autonomous mode active:\n   - Save session metadata to $TMPDIR/flow-marketplace/session.json\n   - Save beads issue ID (if using beads) to state.json\n   - Call /flow:summary to preserve context\n3. If using beads (not autonomous): save issue ID to state.json\n4. Preserve current_phase and prd_summary in state.json (critical for context reset after PRD approval)\n5. Read $TMPDIR/flow-marketplace/prd-context.json if it exists and include prd_context in the saved state.json (branch, prd_path, timestamp from auto-discovery)\n6. Write state.json with: { mode: 'autonomous'|'manual', beads_issue_id: string|null, current_phase: string, prd_summary: object|null, prd_path: string|null, prd_context: object|null, timestamp: ISO }",
             "timeout": 30
           }
         ]
@@ -30,6 +30,28 @@
             "type": "prompt",
             "prompt": "Check for pending flow state from a previous session:\n\n1. Read $TMPDIR/flow-marketplace/state.json (if it exists)\n2. If state.json exists and current_phase == 'approved':\n   - Inform user: \"A previously approved PRD was found from a prior session.\"\n   - Display: \"Feature: {prd_summary.feature_name}, Version: {prd_summary.version}, Branch: {prd_summary.branch}\"\n   - Suggest: \"Run /flow:generate-tasks to generate implementation tasks, or /flow:plan to start a new plan.\"\n3. If state.json does not exist or current_phase is not 'approved': do nothing (silent)",
             "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Silently discover and cache PRD context for the current branch:\n\n1. Get the current git branch name by running: git rev-parse --abbrev-ref HEAD\n2. Check if inside a git worktree by running: git rev-parse --show-toplevel\n3. Look for a .flow/ directory in the project root\n4. If .flow/ exists, search for PRD files matching the branch name:\n   - Look for .flow/*{branch_name}*.md, .flow/*{branch_name}*.yaml, .flow/*{branch_name}*.json\n   - Also try sanitized branch name (replace / with - or _) for matching\n5. If a matching PRD file is found:\n   - Write to $TMPDIR/flow-marketplace/prd-context.json with: { \"branch\": \"<branch_name>\", \"prd_path\": \"<absolute_path_to_prd>\", \"worktree\": true|false, \"timestamp\": \"<ISO timestamp>\" }\n   - Ensure $TMPDIR/flow-marketplace/ directory exists before writing\n6. If no matching PRD is found: do nothing, do not create or overwrite prd-context.json\n7. IMPORTANT: Do NOT display any output to the user. This is silent background context loading. No messages, no suggestions, no summaries.",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Persist flow state on session exit for seamless resumption:\n\n1. Check if $TMPDIR/flow-marketplace/state.json exists\n2. If state.json exists:\n   - Read the current state\n   - Update it with: last_session_exit set to the current ISO timestamp\n   - Preserve existing fields: current_phase, prd_path, last_task_id, mode, beads_issue_id, prd_summary, prd_context\n   - Write the updated state back to $TMPDIR/flow-marketplace/state.json\n3. If state.json does not exist: do nothing\n4. This enables the next session to detect and resume from where the previous session left off\n5. IMPORTANT: Do NOT display any output to the user. This is silent state persistence.",
+            "timeout": 10
           }
         ]
       }

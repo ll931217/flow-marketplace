@@ -86,6 +86,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-02-26
+
+### Changed
+
+#### Flow Plugin - Skills-Based Architecture Migration
+- **BREAKING:** Commands converted to thin wrappers (~20 lines each), down from 700-1,334 lines
+- Migrated all workflow logic to skills with on-demand reference loading (72-84% context savings)
+- Created 5 new skills with SKILL.md + references: plan, generate-tasks, implement, autonomous, cleanup
+- Created 22 reference documents across skill directories for on-demand loading
+- Created shared `autonomous-mode.md` reference (replaces duplicated detection block across 4 commands)
+
+### Added
+
+#### Flow Plugin
+- `skills/plan/SKILL.md` + 4 references (prerequisites, worktree-setup, clarifying-questions, prd-template)
+- `skills/generate-tasks/SKILL.md` + 5 references (task-generation-process, dependency-analysis, testing-strategies, subagent-type-detection, context-discovery)
+- `skills/implement/SKILL.md` + 4 references (task-execution-loop, parallel-execution, subagent-delegation, error-recovery)
+- `skills/autonomous/SKILL.md` + 5 references (phase-workflow, decision-engine-usage, error-recovery-strategies, report-format, configuration)
+- `skills/cleanup/SKILL.md` + 4 references (worktree-merge, test-verification, commit-format, documentation-generation)
+- `skills/shared/references/autonomous-mode.md` - Shared autonomous mode detection protocol
+- SessionStart `*` hook for silent PRD auto-discovery based on git context
+- Stop `*` hook for persisting flow state on session exit
+- Enhanced PreCompact hook to preserve PRD discovery context
+
+### Removed
+
+#### Flow Plugin
+- Deleted `commands/shared/protocols/` directory (5 files) — canonical copies now in `skills/shared/references/`
+
+### Fixed
+- Eliminated protocol duplication between `commands/shared/protocols/` and `skills/shared/references/`
+
 ## [Unreleased]
 
 ### Planned Features
