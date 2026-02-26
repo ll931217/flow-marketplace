@@ -2,7 +2,6 @@
   "hooks": {
     "PreCompact": [
       {
-        "matcher": "*",
         "hooks": [
           {
             "type": "prompt",
@@ -14,7 +13,7 @@
     ],
     "SessionStart": [
       {
-        "matcher": "session_type == 'compact'",
+        "matcher": "compact",
         "hooks": [
           {
             "type": "prompt",
@@ -24,7 +23,7 @@
         ]
       },
       {
-        "matcher": "session_type == 'new'",
+        "matcher": "startup",
         "hooks": [
           {
             "type": "prompt",
@@ -34,7 +33,6 @@
         ]
       },
       {
-        "matcher": "*",
         "hooks": [
           {
             "type": "prompt",
@@ -51,6 +49,20 @@
             "type": "prompt",
             "prompt": "Persist flow state on session exit for seamless resumption:\n\n1. Check if $TMPDIR/flow-marketplace/state.json exists\n2. If state.json exists:\n   - Read the current state\n   - Update it with: last_session_exit set to the current ISO timestamp\n   - Preserve existing fields: current_phase, prd_path, last_task_id, mode, beads_issue_id, prd_summary, prd_context\n   - Write the updated state back to $TMPDIR/flow-marketplace/state.json\n3. If state.json does not exist: do nothing\n4. This enables the next session to detect and resume from where the previous session left off\n5. IMPORTANT: Do NOT display any output to the user. This is silent state persistence.",
             "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Evaluate if Claude should stop: $ARGUMENTS. Check if all tasks are complete."
           }
         ]
       }
