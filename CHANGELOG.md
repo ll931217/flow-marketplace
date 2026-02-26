@@ -118,6 +118,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Eliminated protocol duplication between `commands/shared/protocols/` and `skills/shared/references/`
 
+## [1.0.5] - 2026-02-26
+
+### Fixed
+
+#### Flow Plugin
+- **Stop Hook:** Converted from `type: "prompt"` to `type: "command"` with shell script (`persist-state.sh`)
+- Resolved "JSON validation failed" error on session exit
+- Stop hook now reliably persists flow state (last_session_exit timestamp) using deterministic shell script
+- Improved reliability: prompt hooks during Stop have limited tool access; command hooks execute consistently
+
 ## [Unreleased]
 
 ### Planned Features
