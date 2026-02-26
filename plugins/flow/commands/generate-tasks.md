@@ -121,6 +121,19 @@ This command intelligently detects whether a PRD has been previously processed a
 
 ## Process
 
+0. **Check TMPDIR State (Context Reset Recovery):**
+
+   Before PRD discovery, check if a context reset occurred after PRD approval:
+
+   1. Read `$TMPDIR/flow-marketplace/state.json` (if it exists)
+   2. If `state.json` exists AND `current_phase == "approved"`:
+      - Use stored `prd_path` directly — skip auto-discovery in Step 1
+      - Display: "Resuming from approved PRD: {prd_summary.feature_name} (v{prd_summary.version}) on branch {prd_summary.branch}"
+      - Update `state.json` to set `current_phase: "generate-tasks"`
+      - Proceed to Step 2 (Analyze PRD)
+   3. If `state.json` does not exist, or `current_phase != "approved"`:
+      - Fall through to normal PRD auto-discovery in Step 1 (existing behavior unchanged)
+
 1. **Auto-Discover PRD:** Automatically find the appropriate PRD based on git context.
 
    See: `shared/protocols/prd-discovery.md` for the multi-stage discovery algorithm.

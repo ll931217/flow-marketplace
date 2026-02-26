@@ -612,6 +612,67 @@ need more details:
 
 - **Critical:** Do NOT proceed to task generation without explicit approval
 
+**7b-1. Save State to TMPDIR:**
+
+After updating the PRD status to `approved`, persist state for context reset:
+
+1. Create `$TMPDIR/flow-marketplace/` directory if it does not exist
+2. Write `$TMPDIR/flow-marketplace/state.json` with:
+   ```json
+   {
+     "mode": "autonomous" | "manual",
+     "beads_issue_id": "<issue-id>" | null,
+     "timestamp": "<current ISO timestamp>",
+     "prd_path": "/.flow/prd-[feature]-vN.md",
+     "current_phase": "approved",
+     "prd_summary": {
+       "feature_name": "<from PRD frontmatter>",
+       "version": "v<N>",
+       "branch": "<current git branch>",
+       "requirements_count": <number of functional requirements>,
+       "approval_timestamp": "<current ISO timestamp>"
+     }
+   }
+   ```
+3. Verify the file was written successfully
+
+**7b-2. Mode-Aware Post-Approval Display:**
+
+- **Interactive mode (default):**
+  Display the approval confirmation, then instruct the user to compact and continue:
+
+  ```
+  ✅ PRD Approved!
+
+  📋 PRD: prd-[feature]-vN.md
+  Status: draft → approved
+  Version: N
+  Branch: [branch-name]
+
+  💡 Context Reset Recommended
+  The planning conversation has consumed significant context.
+  For best results during task generation:
+
+  1. Run /compact to clear the context window
+  2. After compact, run /flow:generate-tasks
+
+  The approved PRD state has been saved and will be automatically
+  restored after compaction.
+  ```
+
+  **CRITICAL:** After displaying this message, the agent MUST STOP and wait for the user to run `/compact`. Do NOT proceed to task generation or any other action. The user needs a fresh context window for implementation.
+
+- **Autonomous mode:**
+  Log the transition and continue directly without suggesting compact:
+
+  ```
+  [Maestro] ✓ PRD approved: prd-[feature]-vN.md
+  [Maestro]   → State saved to TMPDIR for compaction resilience
+  [Maestro]   → Continuing to Phase 3: Task Generation
+  ```
+
+  Execution proceeds to `/flow:generate-tasks` without pause.
+
 **PRD Update Process (when changes are requested):**
 The AI performs the following steps internally to update the PRD:
 

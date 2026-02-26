@@ -138,15 +138,33 @@ mkdir -p .flow/maestro/sessions/<session-id>
 [Maestro] → Switching to autonomous mode for remaining phases...
 ```
 
+### Phase 2→3 Transition: State Persistence
+
+After PRD approval in Phase 2, save state to TMPDIR before continuing:
+
+1. Write `$TMPDIR/flow-marketplace/state.json` with `current_phase: "approved"`, `prd_path`, and `prd_summary`
+2. Log the state save for transparency
+3. Continue directly to Phase 3 (no compact needed in autonomous mode)
+
+```bash
+[Maestro]   ✓ PRD approved by user: prd-feature-v1.md
+[Maestro]   → State saved to TMPDIR (compaction resilience)
+[Maestro] → Continuing to Phase 3: Task Generation
+```
+
+If auto-compaction triggers between Phase 2 and Phase 3, the SessionStart hook detects `current_phase == "approved"` with `mode == "autonomous"` and auto-invokes `/flow:generate-tasks` to resume.
+
 ### Phase 3: Task Generation (AUTONOMOUS)
 
-1. **Read PRD** - Parse requirements and priorities
-2. **Generate epics** - 5-7 high-level epics
-3. **Generate sub-tasks** - Detailed tasks with dependencies
-4. **Order tasks** - Optimize for parallel execution
+1. **Recovery check** - If entering after auto-compaction with `current_phase == "approved"` in TMPDIR state, resume from approved PRD path
+2. **Read PRD** - Parse requirements and priorities
+3. **Generate epics** - 5-7 high-level epics
+4. **Generate sub-tasks** - Detailed tasks with dependencies
+5. **Order tasks** - Optimize for parallel execution
 
 ```bash
 [Maestro] Phase 2: Task Generation
+[Maestro]   → State recovered from TMPDIR (if post-compaction)
 [Maestro]   → Created 6 epics with 23 sub-tasks
 [Maestro]   → Ordered into 4 parallel groups
 [Maestro]   ✓ Tasks ready for execution
@@ -699,16 +717,20 @@ When this command is invoked, execute the following workflow:
 6. **WAIT for user approval** of the PRD before proceeding
 7. Save PRD to `.flow/prd-{feature}-v1.md`
 
-**Transition to Autonomous:** Once PRD is approved, switch to autonomous mode for remaining phases.
+**Transition to Autonomous:** Once PRD is approved:
+1. Save state to `$TMPDIR/flow-marketplace/state.json` with `current_phase: "approved"`, `prd_path`, and `prd_summary` (feature_name, version, branch, requirements_count, approval_timestamp)
+2. Log: `[Maestro] → State saved to TMPDIR (compaction resilience)`
+3. Switch to autonomous mode for remaining phases
 
 ### Phase 2: Task Generation (AUTONOMOUS)
-1. Read the approved PRD
-2. Generate 5-7 epics based on requirements
-3. Generate sub-tasks with dependencies
-4. **SKIP the "Wait for Go" checkpoint** - proceed directly to sub-task generation
-5. Assign priorities based on PRD frontmatter
-6. Create tasks in beads (or TodoWrite fallback)
-7. Update PRD frontmatter with related_issues
+1. Check `$TMPDIR/flow-marketplace/state.json` — if `current_phase == "approved"`, use stored `prd_path` directly (post-compaction recovery)
+2. Read the approved PRD
+3. Generate 5-7 epics based on requirements
+4. Generate sub-tasks with dependencies
+5. **SKIP the "Wait for Go" checkpoint** - proceed directly to sub-task generation
+6. Assign priorities based on PRD frontmatter
+7. Create tasks in beads (or TodoWrite fallback)
+8. Update PRD frontmatter with related_issues
 
 ### Phase 3: Implementation (AUTONOMOUS)
 1. Execute tasks continuously without pausing
