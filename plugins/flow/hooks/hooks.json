@@ -55,17 +55,3 @@
     ]
   }
 }
-{
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "Evaluate if Claude should stop: $ARGUMENTS. Check if all tasks are complete."
-          }
-        ]
-      }
-    ]
-  }
-}
