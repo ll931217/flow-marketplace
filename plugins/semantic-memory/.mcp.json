@@ -12,7 +12,7 @@
   "environment": {
     "SEMANTIC_MEMORY_PG_URL": {
       "description": "PostgreSQL connection URL",
-      "default": "postgresql://localhost/semantic_memory",
+      "default": "postgresql://localhost:5432/semantic_memory",
       "required": true
     },
     "SEMANTIC_MEMORY_EMBEDDING_MODEL": {

@@ -1,6 +1,6 @@
 {
   "name": "@flow-marketplace/semantic-memory-mcp",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "MCP server for semantic code search using PostgreSQL + pgvector",
   "type": "module",
   "main": "./dist/index.js",
@@ -11,7 +11,10 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "files": [
     "dist",
@@ -34,7 +37,9 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.10",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
