@@ -40,6 +40,11 @@
     "index_project",
     "get_project_status",
     "delete_project",
-    "list_projects"
+    "list_projects",
+    "memory_add",
+    "memory_search",
+    "memory_list",
+    "memory_delete",
+    "memory_clear_dataset"
   ]
 }

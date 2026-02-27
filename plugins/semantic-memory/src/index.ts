@@ -238,7 +238,7 @@ async function main() {
   const server = new Server(
     {
       name: 'semantic-memory-mcp',
-      version: '1.0.0',
+      version: '2.0.1',
     },
     {
       capabilities: {
