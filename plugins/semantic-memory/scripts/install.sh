@@ -39,7 +39,7 @@ log_info "Node.js $(node -v) found"
 
 # Install npm dependencies
 log_info "Installing npm dependencies..."
-cd "$MCP_SERVER_DIR/mcp-server"
+cd "$MCP_SERVER_DIR"
 if [ ! -d "node_modules" ]; then
     npm install
 else

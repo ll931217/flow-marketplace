@@ -2,12 +2,12 @@
   "$schema": "https://claude.ai/code/schemas/mcp/v1.json",
   "id": "semantic-memory",
   "name": "Semantic Memory",
-  "version": "1.0.0",
+  "version": "2.0.1",
   "description": "PostgreSQL + pgvector MCP server for codebase indexing and semantic search",
   "author": "flow-community",
   "license": "MIT",
   "type": "mcp-server",
-  "entry": "mcp-server/dist/index.js",
+  "entry": "dist/index.js",
   "runtime": "node",
   "environment": {
     "SEMANTIC_MEMORY_PG_URL": {
