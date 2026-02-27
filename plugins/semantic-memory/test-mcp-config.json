@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "semantic-memory": {
+      "command": "node",
+      "args": ["/home/ll931217/Projects/flow-marketplace/plugins/semantic-memory/dist/index.js"],
+      "env": {
+        "SEMANTIC_MEMORY_PG_URL": "postgresql://localhost:5432/semantic_memory"
+      }
+    }
+  }
+}
