@@ -18,6 +18,13 @@ import {
   deleteProject,
   listProjects,
 } from './tools/manage.js';
+import {
+  addMemory,
+  searchMemories,
+  listMemories,
+  deleteMemory,
+  clearDataset,
+} from './tools/memory.js';
 
 const TOOLS: Tool[] = [
   {
@@ -101,6 +108,118 @@ const TOOLS: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {},
+    },
+  },
+  // Memory tools
+  {
+    name: 'memory_add',
+    description:
+      'Add a memory entry to semantic memory. Use this to store user preferences, project knowledge, or coding patterns.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dataset: {
+          type: 'string',
+          description: 'Dataset name (e.g., "user" for preferences, "{project_name}" for project context)',
+        },
+        content: {
+          type: 'string',
+          description: 'The memory content to store',
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Optional tags for categorization',
+        },
+        metadata: {
+          type: 'object',
+          description: 'Optional metadata',
+        },
+      },
+      required: ['dataset', 'content'],
+    },
+  },
+  {
+    name: 'memory_search',
+    description:
+      'Search memories semantically. Returns relevant memories with similarity scores.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Natural language search query',
+        },
+        dataset: {
+          type: 'string',
+          description: 'Optional dataset to search within',
+        },
+        top_k: {
+          type: 'number',
+          description: 'Number of results to return',
+          default: 5,
+        },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'memory_list',
+    description:
+      'List memories with optional filters by dataset and tags.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dataset: {
+          type: 'string',
+          description: 'Filter by dataset',
+        },
+        tags: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Filter by tags (matches any)',
+        },
+        limit: {
+          type: 'number',
+          description: 'Maximum number of results',
+          default: 50,
+        },
+        offset: {
+          type: 'number',
+          description: 'Offset for pagination',
+          default: 0,
+        },
+      },
+    },
+  },
+  {
+    name: 'memory_delete',
+    description:
+      'Delete a specific memory by ID.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+          description: 'Memory ID to delete',
+        },
+      },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'memory_clear_dataset',
+    description:
+      'Clear all memories in a dataset.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dataset: {
+          type: 'string',
+          description: 'Dataset to clear',
+        },
+      },
+      required: ['dataset'],
     },
   },
 ];
@@ -199,6 +318,81 @@ async function main() {
 
         case 'list_projects': {
           const result = await listProjects(db);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              },
+            ],
+          };
+        }
+
+        // Memory tools
+        case 'memory_add': {
+          const result = await addMemory(db, {
+            dataset: String(args?.dataset ?? ''),
+            content: String(args?.content ?? ''),
+            tags: Array.isArray(args?.tags) ? args.tags as string[] : [],
+            metadata: args?.metadata as Record<string, unknown> | undefined,
+          });
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              },
+            ],
+          };
+        }
+
+        case 'memory_search': {
+          const result = await searchMemories(db, {
+            query: String(args?.query ?? ''),
+            dataset: args?.dataset ? String(args.dataset) : undefined,
+            top_k: args?.top_k ? Number(args.top_k) : 5,
+          });
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              },
+            ],
+          };
+        }
+
+        case 'memory_list': {
+          const result = await listMemories(db, {
+            dataset: args?.dataset ? String(args.dataset) : undefined,
+            tags: Array.isArray(args?.tags) ? args.tags as string[] : undefined,
+            limit: args?.limit ? Number(args.limit) : 50,
+            offset: args?.offset ? Number(args.offset) : 0,
+          });
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              },
+            ],
+          };
+        }
+
+        case 'memory_delete': {
+          const result = await deleteMemory(db, String(args?.id ?? ''));
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(result, null, 2),
+              },
+            ],
+          };
+        }
+
+        case 'memory_clear_dataset': {
+          const result = await clearDataset(db, String(args?.dataset ?? ''));
           return {
             content: [
               {

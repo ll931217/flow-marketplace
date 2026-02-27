@@ -47,6 +47,27 @@ export interface SearchResult {
   metadata?: Record<string, unknown>;
 }
 
+// Memory types for user/project knowledge
+export interface Memory {
+  id: string;
+  dataset: string;
+  content: string;
+  content_hash: string;
+  tags: string[];
+  metadata?: Record<string, unknown>;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface MemorySearchResult {
+  id: string;
+  dataset: string;
+  content: string;
+  tags: string[];
+  similarity: number;
+  metadata?: Record<string, unknown>;
+}
+
 /**
  * Database class for managing PostgreSQL connections and operations
  */
@@ -120,6 +141,32 @@ export class Database {
       await client.query(`
         CREATE INDEX IF NOT EXISTS idx_documents_embedding_hnsw
         ON documents USING hnsw (embedding vector_cosine_ops)
+        WITH (m = 16, ef_construction = 64)
+      `);
+
+      // Create memories table for user/project knowledge
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS memories (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          dataset TEXT NOT NULL,
+          content TEXT NOT NULL,
+          content_hash TEXT NOT NULL,
+          embedding vector(384) NOT NULL,
+          tags TEXT[],
+          metadata JSONB,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          UNIQUE(dataset, content_hash)
+        )
+      `);
+
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_memories_dataset ON memories(dataset)
+      `);
+
+      await client.query(`
+        CREATE INDEX IF NOT EXISTS idx_memories_embedding_hnsw
+        ON memories USING hnsw (embedding vector_cosine_ops)
         WITH (m = 16, ef_construction = 64)
       `);
 
@@ -364,6 +411,198 @@ export class Database {
     } finally {
       client.release();
     }
+  }
+
+  // ============ Memory CRUD Operations ============
+
+  /**
+   * Add a memory entry
+   */
+  async addMemory(
+    dataset: string,
+    content: string,
+    embedding: number[],
+    tags: string[] = [],
+    metadata?: Record<string, unknown>
+  ): Promise<Memory> {
+    const client = await this.getClient();
+    try {
+      // Generate content hash for deduplication
+      const contentHash = await this.generateContentHash(content);
+
+      const result: QueryResult<Memory> = await client.query(
+        `INSERT INTO memories (dataset, content, content_hash, embedding, tags, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (dataset, content_hash) DO UPDATE
+         SET content = $2, embedding = $4, tags = $5, metadata = $6, updated_at = NOW()
+         RETURNING *`,
+        [
+          dataset,
+          content,
+          contentHash,
+          `[${embedding.join(',')}]`,
+          tags,
+          JSON.stringify(metadata || {}),
+        ]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Search memories semantically
+   */
+  async searchMemories(
+    queryEmbedding: number[],
+    dataset?: string,
+    limit: number = 5
+  ): Promise<MemorySearchResult[]> {
+    const client = await this.getClient();
+    try {
+      const embeddingStr = `[${queryEmbedding.join(',')}]`;
+
+      let query = `
+        SELECT
+          id,
+          dataset,
+          content,
+          tags,
+          1 - (embedding <=> $1::vector) as similarity,
+          metadata
+        FROM memories
+        WHERE embedding <=> $1::vector < 0.5
+      `;
+
+      const params: (string | number)[] = [embeddingStr];
+      let paramIndex = 2;
+
+      if (dataset) {
+        query += ` AND dataset = $${paramIndex}`;
+        params.push(dataset);
+        paramIndex++;
+      }
+
+      query += ` ORDER BY embedding <=> $1::vector LIMIT $${paramIndex}`;
+      params.push(limit);
+
+      const result: QueryResult<MemorySearchResult> = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * List memories with filters
+   */
+  async listMemories(
+    dataset?: string,
+    tags?: string[],
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<{ memories: Memory[]; total: number }> {
+    const client = await this.getClient();
+    try {
+      let countQuery = 'SELECT COUNT(*) as total FROM memories';
+      let listQuery = 'SELECT * FROM memories';
+      const conditions: string[] = [];
+      const params: (string | number | string[])[] = [];
+      let paramIndex = 1;
+
+      if (dataset) {
+        conditions.push(`dataset = $${paramIndex}`);
+        params.push(dataset);
+        paramIndex++;
+      }
+
+      if (tags && tags.length > 0) {
+        conditions.push(`tags && $${paramIndex}`);
+        params.push(tags);
+        paramIndex++;
+      }
+
+      if (conditions.length > 0) {
+        const whereClause = ' WHERE ' + conditions.join(' AND ');
+        countQuery += whereClause;
+        listQuery += whereClause;
+      }
+
+      // Get total count
+      const countResult = await client.query(countQuery, params.slice(0, paramIndex - 1));
+      const total = Number(countResult.rows[0].total);
+
+      // Get paginated results
+      listQuery += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+      params.push(limit, offset);
+
+      const listResult: QueryResult<Memory> = await client.query(listQuery, params);
+
+      return {
+        memories: listResult.rows,
+        total,
+      };
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Delete a memory by ID
+   */
+  async deleteMemory(id: string): Promise<boolean> {
+    const client = await this.getClient();
+    try {
+      const result = await client.query('DELETE FROM memories WHERE id = $1', [id]);
+      return (result.rowCount ?? 0) > 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Delete all memories in a dataset
+   */
+  async clearDataset(dataset: string): Promise<number> {
+    const client = await this.getClient();
+    try {
+      const result = await client.query('DELETE FROM memories WHERE dataset = $1', [dataset]);
+      return result.rowCount ?? 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Get combined context for injection
+   */
+  async getContextForInjection(
+    queryEmbedding: number[],
+    datasets: string[],
+    limitPerDataset: number = 3
+  ): Promise<Map<string, MemorySearchResult[]>> {
+    const results = new Map<string, MemorySearchResult[]>();
+
+    for (const dataset of datasets) {
+      const memories = await this.searchMemories(queryEmbedding, dataset, limitPerDataset);
+      if (memories.length > 0) {
+        results.set(dataset, memories);
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Generate a simple content hash
+   */
+  private async generateContentHash(content: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(content);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 }
 

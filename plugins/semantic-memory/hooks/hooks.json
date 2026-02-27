@@ -1,0 +1,62 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "keyword",
+        "keywords": [
+          "implement",
+          "create",
+          "build",
+          "add",
+          "make",
+          "refactor",
+          "rewrite",
+          "restructure",
+          "fix",
+          "debug",
+          "solve",
+          "design",
+          "architect",
+          "plan",
+          "update",
+          "modify",
+          "change",
+          "develop",
+          "write",
+          "generate",
+          "set up",
+          "configure"
+        ],
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/retrieve-context.sh \"${CLAUDE_USER_PROMPT}\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "## Session Summary - Capture Learnings\n\nAnalyze this session and identify learnings to save to semantic memory:\n\n### What was implemented or changed?\nReview the files modified and actions taken.\n\n### What decisions were made?\n- Technology choices\n- Pattern selections\n- Architecture decisions\n- Conventions established\n\n### Capture-worthy learnings:\n1. User preferences (save to 'user' dataset)\n2. Project-specific knowledge (save to current project dataset)\n3. Temporary session context (save to 'session' dataset)\n\nIf significant learnings were found, present them to the user and ask if they want to save them to memory.\n\nUse the memory_add MCP tool to save any approved learnings.",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "## Semantic Memory Initialization\n\n1. Check if user preferences exist in memory:\n   - Use memory_list MCP tool with dataset='user'\n   - If no preferences found, suggest: \"No user preferences found. Run /memory:preferences to set up your coding preferences.\"\n\n2. Detect current project:\n   - Get project name from working directory\n   - Check if project knowledge exists using memory_list with dataset='{project_name}'\n   - If no project knowledge, suggest: \"No project knowledge found for {project_name}. Run /memory:project-setup to capture project context.\"\n\n3. IMPORTANT: Be brief and non-intrusive. Only show suggestions if memories are missing.",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "semantic-memory",
+  "version": "2.0.0",
+  "description": "Semantic memory plugin with automatic context retrieval and preference capture for Claude Code",
+  "author": "flow-community",
+  "license": "MIT",
+  "type": "plugin",
+  "extends": "./.mcp.json",
+  "components": {
+    "commands": [
+      {
+        "name": "memory:add",
+        "description": "Add a memory entry to semantic memory",
+        "file": "commands/add.md"
+      },
+      {
+        "name": "memory:search",
+        "description": "Search memories semantically",
+        "file": "commands/search.md"
+      },
+      {
+        "name": "memory:list",
+        "description": "List memories with filters",
+        "file": "commands/list.md"
+      },
+      {
+        "name": "memory:delete",
+        "description": "Delete a memory or clear dataset",
+        "file": "commands/delete.md"
+      },
+      {
+        "name": "memory:sync",
+        "description": "Sync project codebase to semantic index",
+        "file": "commands/sync.md"
+      },
+      {
+        "name": "memory:learn",
+        "description": "Explicitly teach the agent knowledge",
+        "file": "commands/learn.md"
+      }
+    ],
+    "skills": [
+      {
+        "name": "memory-context",
+        "description": "Retrieve and format semantic memory context",
+        "path": "skills/memory-context"
+      },
+      {
+        "name": "preferences",
+        "description": "Interactive user preference setup",
+        "path": "skills/preferences"
+      },
+      {
+        "name": "project-setup",
+        "description": "Project context capture",
+        "path": "skills/project-setup"
+      },
+      {
+        "name": "session-summary",
+        "description": "Session end summary and learning capture",
+        "path": "skills/session-summary"
+      }
+    ],
+    "hooks": {
+      "config": "hooks/hooks.json"
+    }
+  },
+  "dependencies": {
+    "node": ">=18.0.0",
+    "python": ">=3.10",
+    "postgresql": ">=14.0 with pgvector extension"
+  },
+  "environment": {
+    "SEMANTIC_MEMORY_PG_URL": {
+      "description": "PostgreSQL connection URL",
+      "default": "postgresql://localhost/semantic_memory",
+      "required": true
+    },
+    "SEMANTIC_MEMORY_EMBEDDING_MODEL": {
+      "description": "HuggingFace sentence-transformers model name",
+      "default": "all-MiniLM-L6-v2",
+      "required": false
+    }
+  },
+  "install": {
+    "script": "scripts/install.sh",
+    "postinstall": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flow-marketplace/semantic-memory"
+  },
+  "keywords": [
+    "semantic-memory",
+    "context",
+    "preferences",
+    "knowledge-management",
+    "mcp",
+    "pgvector"
+  ]
+}
