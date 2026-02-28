@@ -26,7 +26,7 @@ Complete PRD-based workflow system with autonomous orchestration for Claude Code
 - `/flow:summary` - Show current feature implementation summary
 - Decision-engine skill for autonomous technical decisions
 
-### 2. Semantic Memory Plugin
+### 2. Semantic Memory Plugin (WIP)
 
 PostgreSQL + pgvector MCP server for codebase indexing and semantic search. Index your codebase and perform semantic searches to find relevant code chunks based on natural language queries.
 
@@ -58,10 +58,12 @@ Or use the `/plugin` command within Claude Code:
 ### What Happens During Installation
 
 **Flow Plugin:**
+
 - No build process required
 - Commands and skills are immediately available
 
 **Semantic Memory Plugin:**
+
 - Install script runs automatically
 - npm dependencies are installed
 - TypeScript server is built
@@ -70,6 +72,7 @@ Or use the `/plugin` command within Claude Code:
 ### Manual Prerequisites
 
 **For Flow Plugin:**
+
 - None! Works out of the box
 - Optional: [beads](https://github.com/steveyegge/beads) for enhanced issue tracking
 - Optional: [worktrunk](https://worktrunk.dev/) for git worktree management
@@ -77,6 +80,7 @@ Or use the `/plugin` command within Claude Code:
 **For Semantic Memory Plugin:**
 
 1. **PostgreSQL 14+ with pgvector:**
+
 ```bash
 # Ubuntu/Debian
 sudo apt install postgresql-14 postgresql-14-pgvector
@@ -93,6 +97,7 @@ createdb semantic_memory
 ```
 
 2. **Python 3.10+ with sentence-transformers:**
+
 ```bash
 pip install sentence-transformers numpy
 ```
