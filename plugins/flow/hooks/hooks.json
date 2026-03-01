@@ -46,8 +46,8 @@
       {
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "## Task Completion Verification\n\nBefore stopping, verify ALL work is truly complete:\n\n### 1. Check TodoWrite Tasks\n- Review all todos: are there any pending or in-progress items?\n- If todos exist and are not all completed: CONTINUE working\n\n### 2. Check Beads Issues (if applicable)\n- Run `beads list` to check for open issues\n- If there are open/in-progress issues related to current work: CONTINUE working\n\n### 3. Check Flow State\n- Read $TMPDIR/flow-marketplace/state.json if it exists\n- If autonomous mode is active and phase is not 'completed': CONTINUE working\n\n### 4. Verify Implementation Completeness\n- Are all tests passing?\n- Is the build successful?\n- Are there uncommitted changes that should be committed?\n\n### Decision\n- If ANY task is incomplete: Do NOT stop. Continue working until complete.\n- If ALL tasks are complete: Proceed to stop.\n\nIMPORTANT: This hook prevents premature stopping. Only allow the session to end when genuinely finished.",
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/verify-completion.sh",
             "timeout": 30
           }
         ]
