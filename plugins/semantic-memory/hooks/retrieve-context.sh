@@ -13,6 +13,7 @@ PROJECT_NAME=$(basename "$PWD" 2>/dev/null || echo "unknown")
 
 # Exit silently if no prompt provided
 if [[ -z "$USER_PROMPT" ]]; then
+    echo '{ "continue": true, "suppressOutput": true }'
     exit 0
 fi
 
@@ -25,10 +26,8 @@ if [[ -z "$QUERY_TERMS" ]]; then
     QUERY_TERMS="${USER_PROMPT:0:100}"
 fi
 
-# Output context retrieval instructions
-# The actual MCP call will be made by the agent
-cat <<EOF
-<system-reminder>
+# Build context retrieval instructions as a systemMessage
+read -r -d '' SYS_MSG <<MSGEOF || true
 ## Semantic Memory Context Retrieval
 
 The user prompt contains action keywords. Retrieve relevant context from semantic memory:
@@ -63,7 +62,7 @@ The user prompt contains action keywords. Retrieve relevant context from semanti
 - Execute the above MCP tool calls to retrieve context
 - Inject retrieved memories as context for planning/implementation
 - If no relevant memories found, proceed without additional context
-</system-reminder>
-EOF
+MSGEOF
 
-exit 0
+# Output structured JSON
+jq -n --arg msg "$SYS_MSG" '{ continue: true, suppressOutput: true, systemMessage: $msg }'

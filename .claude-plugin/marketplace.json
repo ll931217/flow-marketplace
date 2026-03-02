@@ -10,7 +10,7 @@
     {
       "name": "flow",
       "description": "Complete PRD-based workflow system with autonomous orchestration for Claude Code",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "source": "./plugins/flow",
       "category": "productivity",
       "tags": [
@@ -23,7 +23,7 @@
     {
       "name": "semantic-memory",
       "description": "Semantic memory plugin with automatic context retrieval, preference capture, and knowledge management for Claude Code",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "source": "./plugins/semantic-memory",
       "category": "productivity",
       "tags": [

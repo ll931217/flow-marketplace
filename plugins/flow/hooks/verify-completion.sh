@@ -18,11 +18,17 @@ if [ -z "$SESSION_ID" ] || [ "$SESSION_ID" = "null" ]; then
   SESSION_ID="unknown-session"
 fi
 
+# --- helper: allow stop with no blocking ---
+allow_stop() {
+  echo '{ "continue": true }'
+  exit 0
+}
+
 # --- skip subagents: they have very short transcripts ---
 if [ -f "$TRANSCRIPT" ]; then
   LINE_COUNT=$(wc -l < "$TRANSCRIPT" 2>/dev/null || echo "0")
   if [ "$LINE_COUNT" -lt 20 ]; then
-    exit 0
+    allow_stop
   fi
 fi
 
@@ -50,7 +56,7 @@ if [ "$HAS_IMPLEMENTATION" = false ] && [ -f "$TRANSCRIPT" ]; then
 fi
 
 if [ "$HAS_IMPLEMENTATION" = false ]; then
-  exit 0
+  allow_stop
 fi
 
 # --- counter ---
@@ -88,7 +94,7 @@ fi
 # --- allow stop if done signal found ---
 if [ "$HAS_DONE_SIGNAL" = true ]; then
   rm -f "$COUNTER_FILE"
-  exit 0
+  allow_stop
 fi
 
 # --- increment counter ---
@@ -98,7 +104,7 @@ echo "$NEXT" > "$COUNTER_FILE"
 # --- optional escape hatch ---
 if [ "$MAX" -gt 0 ] && [ "$NEXT" -ge "$MAX" ]; then
   rm -f "$COUNTER_FILE"
-  exit 0
+  allow_stop
 fi
 
 # --- build block reason ---
@@ -133,4 +139,5 @@ else
 fi
 
 # --- output block decision ---
-jq -n --arg reason "$REASON" '{ decision: "block", reason: $reason }'
+jq -n --arg reason "$REASON" --arg stopReason "$LABEL: Work not yet complete" \
+  '{ continue: false, stopReason: $stopReason, decision: "block", reason: $reason }'

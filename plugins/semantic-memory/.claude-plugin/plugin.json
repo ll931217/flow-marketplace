@@ -1,6 +1,6 @@
 {
   "name": "semantic-memory",
-  "version": "2.0.1",
+  "version": "2.1.1",
   "description": "Semantic memory plugin with automatic context retrieval and preference capture for Claude Code",
   "author": {
     "name": "flow-community",
