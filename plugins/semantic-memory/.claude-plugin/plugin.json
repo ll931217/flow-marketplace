@@ -73,31 +73,7 @@
   "hooks": {
     "UserPromptSubmit": [
       {
-        "matcher": "keyword",
-        "keywords": [
-          "implement",
-          "create",
-          "build",
-          "add",
-          "make",
-          "refactor",
-          "rewrite",
-          "restructure",
-          "fix",
-          "debug",
-          "solve",
-          "design",
-          "architect",
-          "plan",
-          "update",
-          "modify",
-          "change",
-          "develop",
-          "write",
-          "generate",
-          "set up",
-          "configure"
-        ],
+        "matcher": "",
         "hooks": [
           {
             "type": "command",

@@ -2,6 +2,7 @@
   "hooks": {
     "PreCompact": [
       {
+        "matcher": "",
         "hooks": [
           {
             "type": "prompt",
@@ -33,6 +34,7 @@
         ]
       },
       {
+        "matcher": "startup|compact|clear|resume",
         "hooks": [
           {
             "type": "prompt",
@@ -44,6 +46,7 @@
     ],
     "Stop": [
       {
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
@@ -53,6 +56,7 @@
         ]
       },
       {
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
