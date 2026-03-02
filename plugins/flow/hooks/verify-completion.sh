@@ -26,9 +26,34 @@ if [ -f "$TRANSCRIPT" ]; then
   fi
 fi
 
-# --- counter ---
+# --- shared directory ---
 COUNTER_DIR="${TMPDIR:-/tmp}/flow-marketplace"
 mkdir -p "$COUNTER_DIR"
+
+# --- skip if no implementation detected ---
+HAS_IMPLEMENTATION=false
+
+# Check 1: Flow state indicates active implementation phase
+STATE_FILE="${COUNTER_DIR}/state.json"
+if [ -f "$STATE_FILE" ]; then
+  PHASE=$(jq -r '.current_phase // ""' "$STATE_FILE" 2>/dev/null)
+  case "$PHASE" in
+    implement|cleanup|generate-tasks) HAS_IMPLEMENTATION=true ;;
+  esac
+fi
+
+# Check 2: Transcript has file-modifying tool calls
+if [ "$HAS_IMPLEMENTATION" = false ] && [ -f "$TRANSCRIPT" ]; then
+  if grep -qE '"(Write|Edit|NotebookEdit)"' "$TRANSCRIPT" 2>/dev/null; then
+    HAS_IMPLEMENTATION=true
+  fi
+fi
+
+if [ "$HAS_IMPLEMENTATION" = false ]; then
+  exit 0
+fi
+
+# --- counter ---
 COUNTER_FILE="${COUNTER_DIR}/verify-counter-${SESSION_ID}"
 MAX=${FLOW_VERIFY_MAX:-0}
 
@@ -89,37 +114,23 @@ else
   LABEL="FLOW_VERIFY (${NEXT})"
 fi
 
-REASON="${LABEL}: ${PREAMBLE}
+if [ "$NEXT" -eq 1 ]; then
+  REASON="${LABEL}: ${PREAMBLE}
 
 ## Task Completion Verification
 
 Before stopping, verify ALL work is truly complete and emit the done signal:
 
-### 1. Check TodoWrite Tasks
-- Review all todos: are there any pending or in-progress items?
-- If todos exist and are not all completed: CONTINUE working
+1. Check TodoWrite tasks — any pending/in-progress items? Continue working.
+2. Check Beads issues — run \`bd list --status=open\` if applicable.
+3. Check Flow State — read \${TMPDIR}/flow-marketplace/state.json if it exists.
+4. Verify implementation — tests passing, build successful, changes committed.
 
-### 2. Check Beads Issues (if applicable)
-- Run \`bd list --status=open\` or \`bd list --status=in_progress\` to check for open issues
-- If there are open/in-progress issues related to current work: CONTINUE working
-
-### 3. Check Flow State
-- Read \${TMPDIR}/flow-marketplace/state.json if it exists
-- If autonomous mode is active and phase is not 'completed': CONTINUE working
-
-### 4. Verify Implementation Completeness
-- Are all tests passing?
-- Is the build successful?
-- Are there uncommitted changes that should be committed?
-
-### How to Stop
-When ALL tasks are genuinely complete, include this exact marker in your response:
-
-\`\`\`
-FLOW_DONE::${SESSION_ID}
-\`\`\`
-
-This signals that you have verified everything is complete and are ready to stop."
+When ALL tasks are complete, include this marker in your response:
+\`FLOW_DONE::${SESSION_ID}\`"
+else
+  REASON="${LABEL}: ${PREAMBLE} Emit \`FLOW_DONE::${SESSION_ID}\` when done."
+fi
 
 # --- output block decision ---
 jq -n --arg reason "$REASON" '{ decision: "block", reason: $reason }'

@@ -128,6 +128,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stop hook now reliably persists flow state (last_session_exit timestamp) using deterministic shell script
 - Improved reliability: prompt hooks during Stop have limited tool access; command hooks execute consistently
 
+## [1.1.1] - 2026-03-02
+
+### Fixed
+
+#### Flow Plugin
+- **Stop Hook:** `verify-completion.sh` now skips when no implementation occurred during the session
+- Added implementation detection gate: checks flow state phase (`implement`, `cleanup`, `generate-tasks`) and transcript for file-modifying tool calls (`Write`, `Edit`, `NotebookEdit`)
+- Sessions with only questions or research no longer trigger the completion verification blocker
+
 ## [Unreleased]
 
 ### Planned Features
