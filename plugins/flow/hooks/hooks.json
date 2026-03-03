@@ -47,8 +47,8 @@
         "matcher": "startup|compact|clear|resume",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Silently discover and cache PRD context for the current branch:\n\n1. Get the current git branch name by running: git rev-parse --abbrev-ref HEAD\n2. Check if inside a git worktree by running: git rev-parse --show-toplevel\n3. Look for a .flow/ directory in the project root\n4. If .flow/ exists, search for PRD files matching the branch name:\n   - Look for .flow/*{branch_name}*.md, .flow/*{branch_name}*.yaml, .flow/*{branch_name}*.json\n   - Also try sanitized branch name (replace / with - or _) for matching\n5. If a matching PRD file is found:\n   - Write to $TMPDIR/flow-marketplace/prd-context.json with: { \"branch\": \"<branch_name>\", \"prd_path\": \"<absolute_path_to_prd>\", \"worktree\": true|false, \"timestamp\": \"<ISO timestamp>\" }\n   - Ensure $TMPDIR/flow-marketplace/ directory exists before writing\n6. If no matching PRD is found: do nothing, do not create or overwrite prd-context.json\n7. IMPORTANT: Do NOT display any output to the user. This is silent background context loading. No messages, no suggestions, no summaries.",
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/discover-prd-context.sh",
             "timeout": 10
           }
         ]
