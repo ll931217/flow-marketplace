@@ -78,6 +78,18 @@ See [references/dependency-analysis.md](references/dependency-analysis.md) for:
 - Parallel group detection (P:Group-X format)
 - Dependency graph construction
 
+## File Ownership Analysis
+
+When parallel groups are detected, analyze file ownership boundaries and determine whether structured team coordination is needed.
+
+See [references/file-ownership-assignment.md](references/file-ownership-assignment.md) for:
+- Ownership assignment algorithm (map → cluster → assign → resolve → contracts)
+- `team_required` heuristic scoring per parallel group
+- Interface contract generation at ownership boundaries
+- Scope boundary generation (explicit "do NOT modify" lists)
+
+**Output:** Each task in a `team_required` group includes structured ownership metadata (owned files, read-only dependencies, interface contracts, scope boundaries) in addition to the standard relevant files table.
+
 ## Testing Strategy
 
 Select and apply the appropriate testing approach based on PRD requirements.

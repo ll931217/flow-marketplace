@@ -117,6 +117,68 @@ Task(
 )
 ```
 
+## Team-Implementer Delegation
+
+When a parallel group uses team mode (see [team-execution.md](team-execution.md)), subagent delegation is enhanced with file ownership boundaries and structured coordination.
+
+### Agent Type Override
+
+In team mode, the `subagent_type` is overridden to `agent-teams:team-implementer` regardless of the task's original subagent assignment. The original subagent expertise is captured in the delegation prompt as context.
+
+### Delegation Prompt Template
+
+Each team-implementer receives a structured prompt:
+
+```
+## Task: {task_title}
+
+{task_description}
+
+### Original Expertise: {original_subagent_type}
+Apply the patterns and conventions of a {original_subagent_type} agent.
+
+### Agent Assignment
+- **Primary Subagent:** agent-teams:team-implementer
+- **Original Role:** {original_subagent_type}
+- **Fallback Agents:** {fallback_agents}
+- **Applicable Skills:** {applicable_skills}
+
+### Owned Files (Exclusive Write)
+{owned_files_table from task metadata}
+
+### Read-Only Dependencies
+{readonly_deps_table from task metadata}
+
+### Interface Contracts
+{interface_contracts from task metadata}
+
+### Scope Boundaries
+{scope_boundaries from task metadata}
+
+### Acceptance Criteria
+{acceptance_criteria from task/PRD}
+
+### TDD Requirements
+- Write tests FIRST for all new functionality
+- Verify tests fail before implementing (RED)
+- Implement until tests pass (GREEN)
+- Run test suite to confirm no regressions
+```
+
+### Skill Pre-Invocation in Team Mode
+
+Skills are still pre-invoked before team-implementer launch, following the same patterns as standard mode. The skill output is prepended to the delegation prompt.
+
+### Standard vs Team Delegation
+
+| Aspect | Standard Mode | Team Mode |
+|--------|--------------|-----------|
+| Agent type | From task metadata (e.g., `frontend-developer`) | `agent-teams:team-implementer` |
+| File boundaries | Soft guidance in description | Enforced via owned files + scope boundaries |
+| Coordination | None (fire-and-forget) | SendMessage to team-lead and peers |
+| Monitoring | Wait for completion | Idle/progress signals |
+| Error reporting | Return result to orchestrator | Message team-lead with details |
+
 ## Worktree Isolation
 
 When delegating to subagents in parallel:

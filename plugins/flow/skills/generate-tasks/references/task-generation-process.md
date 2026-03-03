@@ -186,6 +186,46 @@ Each task description follows this structure:
 - [Patterns to follow or avoid]
 ```
 
+### File Ownership (when team_required is true)
+
+The following sections are only generated when `team_required` is true for the task's parallel group. When `team_required` is false, only the standard "Relevant Files" table above is generated.
+
+This ownership metadata enables agent-teams coordination with strict file boundaries. See [file-ownership-assignment.md](file-ownership-assignment.md) for the full assignment algorithm.
+
+```markdown
+#### Owned Files (Exclusive Write)
+Files this task may create or modify. No other task in the same parallel group should touch these.
+
+| File | Action | Description |
+|------|--------|-------------|
+| `src/components/LoginForm.tsx` | Create | New login form component |
+| `src/styles/auth.css` | Modify | Add login form styles |
+
+#### Read-Only Dependencies
+Files this task imports from but must NOT modify. Includes the owner task ID for coordination.
+
+| File | Owner | Import Purpose |
+|------|-------|----------------|
+| `src/types/auth.ts` | FLOW-xxx | AuthResponse type |
+| `src/api/client.ts` | FLOW-yyy | API client instance |
+
+#### Interface Contracts
+Shared types and function signatures at ownership boundaries. Contract files are owned by a designated task (typically the earliest dependency) and are read-only for all other tasks in the group.
+
+\`\`\`typescript
+// src/types/auth-contract.ts (read-only, owned by FLOW-xxx)
+export interface AuthResponse { token: string; user: UserProfile; }
+export interface LoginRequest { email: string; password: string; }
+\`\`\`
+
+#### Scope Boundaries
+Explicit list of files and directories this task must NOT modify, even if they seem related.
+
+- `src/api/auth/` — owned by FLOW-yyy (backend API task)
+- `tests/auth/` — owned by FLOW-zzz (testing task)
+- `package.json` — owned by FLOW-xxx (setup task)
+```
+
 ## Post-Generation Steps
 
 ### Verify Issue Structure

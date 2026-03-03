@@ -22,7 +22,7 @@ Persist flow state across Claude Code conversation compaction using project-loca
   "beads_issue_id": "FLOW-123" | null,
   "timestamp": "2024-01-15T10:30:00Z",
   "prd_path": "/path/to/prd.md",
-  "current_phase": "plan" | "approved" | "generate-tasks" | "implement" | "cleanup",
+  "current_phase": "plan" | "approved" | "generate-tasks" | "implement" | "review" | "cleanup",
   "prd_summary": {
     "feature_name": "authentication",
     "version": "v1",
@@ -32,6 +32,33 @@ Persist flow state across Claude Code conversation compaction using project-loca
   } | null
 }
 ```
+
+### team_state (within state.json, when using agent-teams)
+
+```json
+{
+  "team_state": {
+    "active_team": "flow-group-1-maestro-1234567890",
+    "current_group": "P:Group-1",
+    "groups_completed": ["P:Group-0"],
+    "team_tasks": {
+      "FLOW-abc": "task-1",
+      "FLOW-def": "task-2"
+    },
+    "review_team": null
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `active_team` | string \| null | Current TeamCreate team name |
+| `current_group` | string \| null | Currently executing parallel group ID |
+| `groups_completed` | string[] | Parallel groups that finished team execution |
+| `team_tasks` | object | Beads ID → TaskCreate ID mapping for bridge sync |
+| `review_team` | string \| null | Active review team name (during `/flow:review`) |
+
+Managed via `flow-state.sh team` subcommand. See script commands below.
 
 ### session.json (autonomous mode only)
 
@@ -66,6 +93,10 @@ bash "${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh" <command> [args]
 | `reset` | Reset state.json to empty `{}` | `flow-state.sh reset` |
 | `session init [--session-id=<id>]` | Create session.json for autonomous mode | `flow-state.sh session init` |
 | `session clear` | Remove session.json | `flow-state.sh session clear` |
+| `team init <team-name> <group-id>` | Initialize team_state for a parallel group | `flow-state.sh team init flow-group-1 P:Group-1` |
+| `team map <beads-id> <task-id>` | Add beads↔TaskCreate mapping | `flow-state.sh team map FLOW-abc task-1` |
+| `team complete` | Clear active team, add group to completed | `flow-state.sh team complete` |
+| `team clear` | Remove all team_state | `flow-state.sh team clear` |
 
 ### Setting JSON Values
 
@@ -83,8 +114,11 @@ flow-state.sh set beads_issue_id=null
 | plan | PRD approval | `init` then `set current_phase=approved prd_path=... prd_summary=...` |
 | generate-tasks | Start of task generation | `phase generate-tasks` |
 | implement | Start of implementation | `phase implement` |
+| implement | Team mode parallel group | `team init <team-name> <group-id>` |
+| implement | Team group complete | `team complete` |
+| review | Start of review | `phase review` |
 | autonomous | Phase 0 initialization | `init --mode=autonomous` + `session init` |
-| cleanup | After finalization | `reset` + `session clear` |
+| cleanup | After finalization | `reset` + `session clear` + `team clear` |
 
 ## Read Operations
 

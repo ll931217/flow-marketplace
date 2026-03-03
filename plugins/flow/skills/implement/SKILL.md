@@ -94,6 +94,20 @@ See [references/parallel-execution.md](references/parallel-execution.md) for:
 - Phase-based execution (analysis -> concurrent execution -> monitoring -> validation)
 - Group state tracking with beads labels
 
+## Team-Based Execution
+
+When a parallel group has `team_required: true` and the agent-teams plugin is available, execution uses structured team coordination instead of fire-and-forget subagent launches.
+
+See [references/team-execution.md](references/team-execution.md) for:
+- Beads↔TaskCreate bridge protocol (sync persistent and ephemeral tracking)
+- Full team lifecycle (TeamCreate → bridge → spawn → monitor → collect → verify → TeamDelete)
+- Team state schema and compaction resilience
+- Delegation prompt template with file ownership metadata
+
+**Detection:** See [../shared/references/agent-teams-detection.md](../shared/references/agent-teams-detection.md) for how to determine agent-teams availability.
+
+**Fallback:** When agent-teams is unavailable or `team_required` is false, standard `[P:Group-X]` fire-and-forget execution is used.
+
 ## Subagent Delegation
 
 Each task is routed to a specialized subagent based on task metadata.
@@ -113,6 +127,7 @@ See [references/error-recovery.md](references/error-recovery.md) for:
 - Error classification and retry strategies
 - Blocked task handling protocol
 - Ralph Wiggum iterative loops for persistent failures
+- Team-debugger escalation (hypothesis-driven parallel debugging when agent-teams available)
 - When to escalate to user
 - Rollback procedures
 

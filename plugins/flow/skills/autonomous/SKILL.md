@@ -49,6 +49,7 @@ Initialize state and session tracking before any phase begins:
 SCRIPT="${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh"
 bash "$SCRIPT" init --mode=autonomous
 bash "$SCRIPT" session init
+bash "$SCRIPT" team clear  # Ensure clean team state from any previous session
 ```
 
 ### Phase 1: Planning (INTERACTIVE)
@@ -61,7 +62,11 @@ Read the approved PRD, generate 5-7 epics with sub-tasks, resolve dependencies, 
 
 ### Phase 3: Implementation (AUTONOMOUS)
 
-Execute tasks continuously using specialized subagents, run parallel groups concurrently, auto-recover from failures, and create git checkpoints at safe points.
+Execute tasks continuously using specialized subagents, run parallel groups concurrently, auto-recover from failures, and create git checkpoints at safe points. When `team_required` groups are detected and agent-teams is available, use structured team coordination (TeamCreate → team-implementers → monitor → TeamDelete).
+
+### Phase 3.5: Review (AUTONOMOUS)
+
+Run multi-dimensional code review via `/flow:review`. When agent-teams is available, spawn parallel team-reviewers across security, performance, architecture, testing, and accessibility dimensions. Auto-fix Critical and High severity findings.
 
 ### Phase 4: Validation (AUTONOMOUS)
 
@@ -69,7 +74,7 @@ Run the test suite, validate PRD requirements are met, execute quality gates (li
 
 ### Phase 5: Cleanup (AUTONOMOUS)
 
-Run `/flow:cleanup` to finalize, update PRD status to `implemented`. State and session files are reset by the cleanup skill.
+Run `/flow:cleanup` to finalize, update PRD status to `implemented`. State, session, and team files are reset by the cleanup skill.
 
 ### Phase 6: Handoff (REPORT)
 
@@ -134,9 +139,10 @@ For the report template and section details, see [references/report-format.md](r
            v                    v                    v
 +------------------+  +------------------+  +------------------+
 | Subagent Factory |  | Skill Orch.      |  | Parallel Coord.  |
-| - 20+ categories |  | - 5 built-in     |  | - [P:Group-X]    |
-| - Auto-detection |  | - Pre-invocation |  | - Concurrent     |
-+------------------+  +------------------+  +------------------+
+| - 20+ categories |  | - 6 built-in     |  | - [P:Group-X]    |
+| - Auto-detection |  | - Pre-invocation |  | - Team mode      |
++------------------+  +------------------+  | - Standard mode  |
+                                            +------------------+
 ```
 
 ## Integration with Flow Commands
@@ -148,6 +154,7 @@ Maestro orchestrates existing flow commands in sequence:
 | Planning | `/flow:plan` | Interactive |
 | Task Generation | `/flow:generate-tasks` | Autonomous |
 | Implementation | `/flow:implement` | Autonomous |
+| Review | `/flow:review` | Autonomous |
 | Validation | `/flow:summary` | Autonomous |
 | Handoff | `/flow:cleanup` | Autonomous |
 

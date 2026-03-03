@@ -62,6 +62,46 @@ P:Group-3 (depends on Group-2):
   - Write integration tests (depends on all endpoints)
 ```
 
+## Team Coordination Assessment
+
+After detecting parallel groups, assess whether each group would benefit from structured team coordination via agent-teams.
+
+### team_required Heuristic
+
+For each parallel group, compute a coordination score:
+
+| Factor | Score | Description |
+|--------|-------|-------------|
+| Group size >= 3 tasks | +2 | Enough tasks to justify coordination overhead |
+| File overlap detected (pre-resolution) | +2 | Multiple tasks initially targeting the same files |
+| Cross-layer work | +1 | Tasks span UI + API + DB layers |
+| Shared configuration modifications | +1 | Multiple tasks need config file changes |
+| Interface contracts required | +1 | Tasks need explicit integration points |
+
+**Decision threshold:** Score >= 4 → `team_required: true`, otherwise `false`.
+
+### Group Metadata
+
+Store coordination metadata per parallel group:
+
+| Field | Description |
+|-------|-------------|
+| `team_required` | Boolean flag from heuristic scoring |
+| `score` | Numeric coordination score |
+| `ownership_strategy` | `by-directory`, `by-module`, `by-layer`, or `hybrid` |
+| `integration_pattern` | `vertical-slice`, `horizontal-layer`, or `hybrid` |
+
+### Ownership Strategy Selection
+
+| Codebase Pattern | Strategy | Rationale |
+|-----------------|----------|-----------|
+| Clear directory boundaries per feature | `by-directory` | Natural file clusters |
+| Domain-driven design with modules | `by-module` | Logical module ownership |
+| Traditional MVC/layered architecture | `by-layer` | Layer-based separation |
+| Mixed patterns | `hybrid` | Combine vertical slices with shared infrastructure |
+
+See [file-ownership-assignment.md](file-ownership-assignment.md) for the full ownership assignment algorithm including conflict resolution and interface contract generation.
+
 ## Dependency Graph Construction
 
 ### With Beads

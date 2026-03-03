@@ -2,7 +2,10 @@
 
 ## Overview
 
-Tasks tagged with `[P:Group-X]` are executed concurrently via multiple specialized subagents. This enables faster implementation when tasks have no file conflicts or blocking dependencies.
+Tasks tagged with `[P:Group-X]` are executed concurrently. Execution mode is selected per group based on the `team_required` flag and agent-teams availability:
+
+- **Team Mode:** Structured coordination via TeamCreate, team-implementers with file ownership enforcement, inter-agent messaging, and monitoring. See [team-execution.md](team-execution.md).
+- **Standard Mode:** Fire-and-forget subagent launch (current behavior). No inter-agent coordination.
 
 ## [P:Group-X] Coordination Pattern
 
@@ -36,12 +39,42 @@ Before starting any parallel group:
 
 ### Phase 2: Concurrent Execution
 
-Launch all tasks in the group simultaneously:
-- Use multiple specialized subagents via the Task tool with parallel invocations
+Select execution mode and launch tasks:
+
+#### Mode Selection
+
+```
+if team_required == true AND agent-teams available:
+  -> Team Mode (Phase 2a)
+else:
+  -> Standard Mode (Phase 2b)
+```
+
+See [../../shared/references/agent-teams-detection.md](../../shared/references/agent-teams-detection.md) for the detection protocol.
+
+#### Phase 2a: Team Mode
+
+When `team_required` is true and agent-teams is available:
+
+1. Create team via `TeamCreate` with group context
+2. Bridge beads issues to TaskCreate entries
+3. Spawn `agent-teams:team-implementer` for each task with owned files, interface contracts, and scope boundaries
+4. Monitor progress via idle/completion signals
+5. Collect results and verify integration
+6. Shutdown team via `TeamDelete`
+
+See [team-execution.md](team-execution.md) for the full team lifecycle protocol.
+
+#### Phase 2b: Standard Mode
+
+When `team_required` is false or agent-teams is unavailable:
+
+- Use multiple specialized subagents via the Agent tool with parallel invocations
 - Each subagent works on their assigned files (listed in task description)
 - Update all task statuses to `in_progress`
 - Respect the subagent type metadata for optimal task routing
 - Apply skills before subagent execution when `applicable_skills` is present
+- No inter-agent coordination; tasks run independently
 
 ### Phase 3: Coordination and Monitoring
 

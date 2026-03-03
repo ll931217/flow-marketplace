@@ -226,8 +226,91 @@ EOF
   esac
 }
 
+# --- team: Manage team_state for agent-teams coordination ---
+cmd_team() {
+  local subcmd="${1:?Usage: flow-state.sh team init|map|complete|clear}"
+  shift
+
+  case "$subcmd" in
+    init)
+      local team_name="${1:?Usage: flow-state.sh team init <team-name> <group-id>}"
+      local group_id="${2:?Usage: flow-state.sh team init <team-name> <group-id>}"
+      cmd_set "team_state={\"active_team\":\"$team_name\",\"current_group\":\"$group_id\",\"groups_completed\":[],\"team_tasks\":{},\"review_team\":null}"
+      echo "Team state initialized: $team_name ($group_id)"
+      ;;
+
+    map)
+      local beads_id="${1:?Usage: flow-state.sh team map <beads-id> <task-id>}"
+      local task_id="${2:?Usage: flow-state.sh team map <beads-id> <task-id>}"
+      ensure_dir
+      local effective_file
+      effective_file=$(resolve_state_file "state.json")
+      if [[ ! -f "$effective_file" ]]; then
+        echo "Error: no state file" >&2
+        return 1
+      fi
+      if command -v jq &>/dev/null; then
+        local tmp
+        tmp=$(mktemp)
+        jq --arg bid "$beads_id" --arg tid "$task_id" '.team_state.team_tasks[$bid] = $tid' "$effective_file" > "$tmp" && mv "$tmp" "$STATE_FILE"
+      elif command -v python3 &>/dev/null; then
+        python3 -c "
+import json
+state = json.load(open('$effective_file'))
+if 'team_state' not in state: state['team_state'] = {'team_tasks': {}}
+if 'team_tasks' not in state['team_state']: state['team_state']['team_tasks'] = {}
+state['team_state']['team_tasks']['$beads_id'] = '$task_id'
+with open('$STATE_FILE', 'w') as f: json.dump(state, f, indent=2)
+"
+      fi
+      echo "Mapped $beads_id -> $task_id"
+      ;;
+
+    complete)
+      ensure_dir
+      local effective_file
+      effective_file=$(resolve_state_file "state.json")
+      if [[ ! -f "$effective_file" ]]; then
+        echo "Error: no state file" >&2
+        return 1
+      fi
+      if command -v jq &>/dev/null; then
+        local tmp
+        tmp=$(mktemp)
+        jq '.team_state.groups_completed += [.team_state.current_group] | .team_state.active_team = null | .team_state.current_group = null | .team_state.team_tasks = {}' "$effective_file" > "$tmp" && mv "$tmp" "$STATE_FILE"
+      elif command -v python3 &>/dev/null; then
+        python3 -c "
+import json
+state = json.load(open('$effective_file'))
+ts = state.get('team_state', {})
+completed = ts.get('groups_completed', [])
+completed.append(ts.get('current_group'))
+ts['groups_completed'] = completed
+ts['active_team'] = None
+ts['current_group'] = None
+ts['team_tasks'] = {}
+state['team_state'] = ts
+with open('$STATE_FILE', 'w') as f: json.dump(state, f, indent=2)
+"
+      fi
+      echo "Team group completed"
+      ;;
+
+    clear)
+      cmd_set "team_state=null"
+      echo "Team state cleared"
+      ;;
+
+    *)
+      echo "Unknown team subcommand: $subcmd" >&2
+      echo "Usage: flow-state.sh team init|map|complete|clear" >&2
+      return 1
+      ;;
+  esac
+}
+
 # --- main dispatch ---
-cmd="${1:?Usage: flow-state.sh <init|get|set|phase|reset|session> [args]}"
+cmd="${1:?Usage: flow-state.sh <init|get|set|phase|reset|session|team> [args]}"
 shift
 
 case "$cmd" in
@@ -237,9 +320,10 @@ case "$cmd" in
   phase)   cmd_phase "$@" ;;
   reset)   cmd_reset "$@" ;;
   session) cmd_session "$@" ;;
+  team)    cmd_team "$@" ;;
   *)
     echo "Unknown command: $cmd" >&2
-    echo "Usage: flow-state.sh <init|get|set|phase|reset|session> [args]" >&2
+    echo "Usage: flow-state.sh <init|get|set|phase|reset|session|team> [args]" >&2
     exit 1
     ;;
 esac

@@ -116,11 +116,15 @@ After PRD approval, save state before continuing:
 
 **Actions:**
 1. Execute parallel groups using `[P:Group-X]` markers
-2. Delegate to specialized subagents via Task tool (20+ categories: frontend-developer, backend-architect, database-admin, test-automator, security-auditor, etc.)
-3. Pre-invoke applicable skills (frontend-design, webapp-testing, document-skills)
-4. Handle errors with smart recovery and fallbacks
-5. Create git checkpoints at safe points (phase completion, group completion)
-6. **DO NOT pause** between tasks or at phase boundaries
+2. For each parallel group, select execution mode:
+   - **Team mode** (when `team_required` is true AND agent-teams available): TeamCreate → bridge beads↔TaskCreate → spawn team-implementers with file ownership → monitor → collect → verify → TeamDelete
+   - **Standard mode** (when `team_required` is false OR agent-teams unavailable): Fire-and-forget subagent launch (current behavior)
+3. Delegate to specialized subagents via Agent tool (20+ categories: frontend-developer, backend-architect, database-admin, test-automator, security-auditor, etc.)
+4. Pre-invoke applicable skills (frontend-design, webapp-testing, document-skills)
+5. Handle errors with smart recovery and fallbacks (including team-debugger escalation when available)
+6. Create git checkpoints at safe points (phase completion, group completion)
+7. Manage team state via `flow-state.sh team` commands
+8. **DO NOT pause** between tasks or at phase boundaries
 
 **Log Example:**
 ```
@@ -132,7 +136,38 @@ After PRD approval, save state before continuing:
 [Maestro]   -> [P:Group-2] Executing 4 tasks...
 ```
 
-**Exit:** All tasks completed, all checkpoints committed.
+**Exit:** All tasks completed, all checkpoints committed, team state cleared.
+
+## Phase 4.5: Review (AUTONOMOUS)
+
+**Entry:** All implementation tasks completed.
+
+**Mode:** AUTONOMOUS - no human interaction.
+
+**Actions:**
+1. Invoke `/flow:review` to run multi-dimensional code review
+2. Determine changed files from implementation (git diff)
+3. Select 2-4 review dimensions based on file types
+4. Execute review:
+   - **Team mode** (agent-teams available): TeamCreate → spawn team-reviewers (one per dimension) → collect findings → TeamDelete
+   - **Standard mode** (no agent-teams): Sequential single-agent review per dimension
+5. Consolidate findings: deduplicate, calibrate severity
+6. Auto-fix Critical and High severity findings
+7. Run tests after each auto-fix to prevent regressions
+8. Generate consolidated review report
+9. Update flow state: `flow-state.sh phase review`
+
+**Log Example:**
+```
+[Maestro] Phase 3.5: Review
+[Maestro]   -> Reviewing 15 files across 3 dimensions (security, performance, architecture)
+[Maestro]   -> 3 team-reviewers completed
+[Maestro]   -> Findings: 0C / 2H / 5M / 3L
+[Maestro]   -> Auto-fixed: 1 of 2 fixable High issues
+[Maestro] OK Review complete
+```
+
+**Exit:** Review report generated, fixable findings remediated.
 
 ## Phase 5: Validation (AUTONOMOUS)
 
