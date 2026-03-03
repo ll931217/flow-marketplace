@@ -54,15 +54,28 @@ bash "$SCRIPT" team clear  # Ensure clean team state from any previous session
 
 ### Phase 1: Planning (INTERACTIVE)
 
-Analyze the feature request, explore codebase patterns, ask clarifying questions, invoke the decision engine for technical choices, generate a PRD, and wait for user approval.
+**This phase is INTERACTIVE — the user MUST be engaged before proceeding.**
+
+1. **Critically evaluate the feature request** — Do not blindly accept the user's idea. Provide constructive criticism: flag potential issues, suggest improvements, identify missing considerations, and offer better alternatives if they exist. Use `AskUserQuestion` to present your analysis and proposed refinements. Proceed only once the user agrees on a direction.
+2. **Explore approaches** — Propose 2-3 design approaches with trade-offs and a recommendation. Apply YAGNI: strip unnecessary scope. Use `AskUserQuestion` to present the approaches and let the user choose. Converge on a direction before generating the PRD.
+3. **Invoke `/flow:plan`** — Delegates the full PRD workflow to the plan skill, which handles:
+   - Prerequisites check and worktree setup
+   - Codebase context discovery (parallel Explore agents)
+   - Clarifying questions (3-5 at a time via AskUserQuestion)
+   - Decision engine for tech stack and architecture choices
+   - PRD generation, review checklist, and user approval
+   - Saves PRD to `.flow/prd-{feature}-v1.md`
+   - State persistence after approval
+
+**Note:** Autonomous mode does NOT skip clarifying questions. It skips intermediate confirmations ("Ready to proceed?", "Can I move on?") in later phases. Phase 1 is always fully interactive.
 
 ### Phase 2: Task Generation (AUTONOMOUS)
 
-Read the approved PRD, generate 5-7 epics with sub-tasks, resolve dependencies, optimize for parallel execution, and create tasks in beads.
+Invoke `/flow:generate-tasks`. Reads the approved PRD, generates 5-7 epics with sub-tasks, resolves dependencies, optimizes for parallel execution, and creates tasks in beads.
 
 ### Phase 3: Implementation (AUTONOMOUS)
 
-Execute tasks continuously using specialized subagents, run parallel groups concurrently, auto-recover from failures, and create git checkpoints at safe points. When `team_required` groups are detected and agent-teams is available, use structured team coordination (TeamCreate → team-implementers → monitor → TeamDelete).
+Invoke `/flow:implement`. Executes tasks continuously using specialized subagents, runs parallel groups concurrently, auto-recovers from failures, and creates git checkpoints at safe points. When `team_required` groups are detected and agent-teams is available, uses structured team coordination (TeamCreate → team-implementers → monitor → TeamDelete).
 
 ### Phase 3.5: Review (AUTONOMOUS)
 

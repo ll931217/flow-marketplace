@@ -40,32 +40,65 @@ All Maestro output uses the `[Maestro]` prefix:
 
 **Mode:** INTERACTIVE - human input required.
 
+> **Autonomous mode clarification:** Autonomous mode does NOT mean "skip clarifying questions." Phase 1 is always fully interactive regardless of mode. Autonomous mode only affects behavior AFTER PRD approval: it skips intermediate confirmations ("Ready to proceed?", "Shall I continue?") in Phases 2-5 and continues execution without stopping. The plan skill handles this distinction via its `--mode=autonomous` vs `--mode=manual` approval paths.
+
 **Actions:**
-1. Auto-discover codebase context (languages, frameworks, patterns)
-2. Ask clarifying questions via AskUserQuestion for:
-   - Ambiguous requirements
-   - Multiple valid approaches where user preference matters
-   - Missing information
-   - Conflicting specifications
-3. Invoke decision engine for tech stack and architecture choices (with human review)
-4. Generate PRD with gathered requirements
-5. Wait for user approval of the PRD
-6. Save PRD to `.flow/prd-{feature}-v1.md`
-7. Log all decisions with rationale to `decisions.json`
+
+**Step 1: Critical evaluation of the feature request**
+
+Before any planning work, critically evaluate the user's idea:
+- Identify potential issues, risks, or blind spots in the request
+- Suggest improvements or refinements
+- Flag scope concerns (too broad, too narrow, missing edge cases)
+- Offer better alternatives if they exist
+- Do NOT blindly accept the request as-is
+
+Use `AskUserQuestion` to present the analysis and proposed refinements. Proceed only after the user agrees on a direction.
+
+**Step 2: Explore design approaches**
+
+Propose 2-3 design approaches with trade-offs:
+- Lead with the recommended approach and explain why
+- Include at least one simpler alternative (YAGNI check)
+- Highlight trade-offs: complexity, maintainability, performance, scope
+- Apply YAGNI ruthlessly — remove unnecessary features from all approaches
+
+Use `AskUserQuestion` to present the approaches and let the user choose a direction.
+
+**Step 3: Invoke `/flow:plan`**
+
+Delegate to the plan skill (`/flow:plan`) which handles the full PRD workflow:
+1. Prerequisites check (git required, beads/worktrunk optional)
+2. Worktree setup (detect or create isolated feature worktree)
+3. Git context detection and existing PRD discovery
+4. Codebase context discovery (1-3 parallel Explore agents)
+5. Clarifying questions (3-5 at a time via AskUserQuestion)
+6. Priority inference for requirements (P0-P4)
+7. Decision engine for tech stack and architecture choices (with human review)
+8. PRD generation using the structured template
+9. PRD review checklist verification
+10. User approval workflow
+11. Save PRD to `.flow/prd-{feature}-v1.md`
+12. Persist state via `flow-state.sh` with `current_phase=approved`, `prd_path`, and `prd_summary`
 
 **Log Example:**
 ```
 [Maestro] Phase 1: Planning (INTERACTIVE)
+[Maestro]   -> Evaluating feature request...
+[Maestro]   -> Suggestion: Consider X instead of Y for better maintainability
+[Maestro]   -> Proposing 3 approaches...
+[Maestro]   -> User selected: Approach B (middleware pattern)
+[Maestro]   -> Invoking /flow:plan...
 [Maestro]   -> Analyzing codebase...
 [Maestro]   -> Question: Which OAuth providers should be supported?
 [Maestro]   -> Decision: Tech stack - React + TypeScript (existing)
-[Maestro]   -> Decision: Architecture - Service layer pattern
 [Maestro]   -> Generating PRD...
 [Maestro] OK PRD approved by user: prd-feature-v1.md
-[Maestro]   -> Switching to autonomous mode for remaining phases...
+[Maestro]   -> State saved (compaction resilience)
+[Maestro]   -> Proceeding to Phase 3: Task Generation...
 ```
 
-**Exit:** PRD approved by user, state saved, autonomous mode activated.
+**Exit:** PRD approved by user, state saved, orchestrator proceeds to Phase 3 (Task Generation).
 
 ## Phase 2-to-3 Transition: State Persistence
 
@@ -87,6 +120,7 @@ After PRD approval, save state before continuing:
 **Mode:** AUTONOMOUS - no human interaction.
 
 **Actions:**
+0. Invoke `/flow:generate-tasks` to execute the full task generation workflow
 1. Recovery check: if entering after auto-compaction with `current_phase == "approved"`, use stored `prd_path` from persisted state
 2. Read the approved PRD and parse requirements
 3. Generate 5-7 high-level epics based on requirements
@@ -115,6 +149,7 @@ After PRD approval, save state before continuing:
 **Mode:** AUTONOMOUS - no human interaction.
 
 **Actions:**
+0. Invoke `/flow:implement` to execute the full implementation workflow
 1. Execute parallel groups using `[P:Group-X]` markers
 2. For each parallel group, select execution mode:
    - **Team mode** (when `team_required` is true AND agent-teams available): TeamCreate → bridge beads↔TaskCreate → spawn team-implementers with file ownership → monitor → collect → verify → TeamDelete
