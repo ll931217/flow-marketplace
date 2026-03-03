@@ -26,7 +26,7 @@ allow_stop() {
 
 # --- skip subagents: they have very short transcripts ---
 if [ -f "$TRANSCRIPT" ]; then
-  LINE_COUNT=$(wc -l < "$TRANSCRIPT" 2>/dev/null || echo "0")
+  LINE_COUNT=$(wc -l <"$TRANSCRIPT" 2>/dev/null || echo "0")
   if [ "$LINE_COUNT" -lt 20 ]; then
     allow_stop
   fi
@@ -44,7 +44,7 @@ STATE_FILE="${COUNTER_DIR}/state.json"
 if [ -f "$STATE_FILE" ]; then
   PHASE=$(jq -r '.current_phase // ""' "$STATE_FILE" 2>/dev/null)
   case "$PHASE" in
-    implement|cleanup|generate-tasks) HAS_IMPLEMENTATION=true ;;
+  implement | cleanup | generate-tasks) HAS_IMPLEMENTATION=true ;;
   esac
 fi
 
@@ -99,7 +99,7 @@ fi
 
 # --- increment counter ---
 NEXT=$((COUNT + 1))
-echo "$NEXT" > "$COUNTER_FILE"
+echo "$NEXT" >"$COUNTER_FILE"
 
 # --- optional escape hatch ---
 if [ "$MAX" -gt 0 ] && [ "$NEXT" -ge "$MAX" ]; then
@@ -139,5 +139,5 @@ else
 fi
 
 # --- output block decision ---
-jq -n --arg reason "$REASON" --arg stopReason "$LABEL: Work not yet complete" \
-  '{ continue: false, stopReason: $stopReason, decision: "block", reason: $reason }'
+jq -n --arg reason "$REASON" \
+  '{ hookSpecificOutput: { hookEventName: "Stop", permissionDecision: "deny", permissionDecisionReason: $stopReason } }'
