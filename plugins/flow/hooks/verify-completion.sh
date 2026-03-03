@@ -20,7 +20,7 @@ fi
 
 # --- helper: allow stop with no blocking ---
 allow_stop() {
-  echo '{ "continue": true }'
+  echo '{ "decision": "approve" }'
   exit 0
 }
 
@@ -148,4 +148,4 @@ fi
 
 # --- output block decision ---
 jq -n --arg reason "$REASON" \
-  '{ hookSpecificOutput: { hookEventName: "Stop", permissionDecision: "deny", permissionDecisionReason: $reason } }'
+  '{ "decision": "block", "reason": $reason }'

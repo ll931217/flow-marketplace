@@ -2,7 +2,7 @@
 set -euo pipefail
 
 json_ok() {
-  echo '{ "continue": true, "suppressOutput": true }'
+  echo '{ "decision": "approve" }'
   exit 0
 }
 

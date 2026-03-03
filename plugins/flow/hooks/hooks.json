@@ -37,9 +37,9 @@
         "matcher": "startup",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Check for pending flow state from a previous session using the flow-state.sh script:\n\nSCRIPT=\"${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh\"\n\n1. Read state: bash \"$SCRIPT\" get\n2. If state is not empty ({}) and current_phase == 'approved':\n   - Read prd_summary: bash \"$SCRIPT\" get prd_summary\n   - Inform user: \"A previously approved PRD was found from a prior session.\"\n   - Display: feature_name, version, branch from prd_summary\n   - Suggest: \"Run /flow:generate-tasks to generate implementation tasks, or /flow:plan to start a new plan.\"\n3. If state is empty or current_phase is not 'approved': do nothing (silent)",
-            "timeout": 15
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/check-pending-state.sh",
+            "timeout": 10
           }
         ]
       },

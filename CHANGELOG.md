@@ -137,6 +137,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added implementation detection gate: checks flow state phase (`implement`, `cleanup`, `generate-tasks`) and transcript for file-modifying tool calls (`Write`, `Edit`, `NotebookEdit`)
 - Sessions with only questions or research no longer trigger the completion verification blocker
 
+## [1.1.2] - 2026-03-03
+
+### Fixed
+
+#### Flow Plugin
+- **Stop Hooks:** Fixed JSON output format — was using PreToolUse schema (`hookSpecificOutput`/`permissionDecision`) instead of Stop schema (`decision`/`reason`)
+- `verify-completion.sh`: block output now returns `{ "decision": "block", "reason": "..." }` instead of `{ "hookSpecificOutput": { "permissionDecision": "deny" } }`
+- `verify-completion.sh`: allow output now returns `{ "decision": "approve" }` instead of `{ "continue": true }`
+- `persist-state.sh`: output now returns `{ "decision": "approve" }` instead of `{ "continue": true, "suppressOutput": true }`
+
+### Changed
+
+#### Flow Plugin
+- **SessionStart:startup hook:** Converted from `type: "prompt"` to `type: "command"` with `check-pending-state.sh` — eliminates LLM call on every startup for a deterministic file check
+
 ## [Unreleased]
 
 ### Planned Features
