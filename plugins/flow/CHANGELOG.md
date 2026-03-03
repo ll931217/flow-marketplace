@@ -1,6 +1,13 @@
 # Changelog
 
-## [Unreleased]
+## [2.1.0]
+
+### Fixed
+- **Autonomous orchestrator phases**: Restored explicit `/flow:plan`, `/flow:generate-tasks`, and `/flow:implement` skill invocations in Phase 1-3 descriptions that were lost during skills migration
+- **Phase 1 brainstorming**: Added critical evaluation and approach exploration steps before PRD generation so the AI provides constructive criticism and proposes alternatives
+- **Autonomous mode clarification**: Documented that autonomous mode skips intermediate confirmations in later phases, NOT clarifying questions during planning
+
+## [2.0.0]
 
 ### Added
 - **Agent-teams integration:** Structured multi-agent coordination for parallel execution when agent-teams plugin is available
