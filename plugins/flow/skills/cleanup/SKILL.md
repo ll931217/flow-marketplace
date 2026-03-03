@@ -110,7 +110,19 @@ After all cleanup steps complete, the PRD frontmatter is updated:
 - `draft` - PRD not yet approved, cannot cleanup
 - `implemented` - Already implemented, nothing to do
 
-**Changelog Entry Format:**
+## State Cleanup
+
+After all PRD status updates are complete, reset the TMPDIR state files:
+
+```bash
+SCRIPT="${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh"
+bash "$SCRIPT" session clear
+bash "$SCRIPT" reset
+```
+
+This ensures the next session starts with a clean state and the SessionStart hooks do not surface stale data.
+
+## Changelog Entry Format
 
 For worktree merge:
 ```markdown

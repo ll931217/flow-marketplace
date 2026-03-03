@@ -40,10 +40,10 @@ Before PRD discovery, check for a context reset after PRD approval.
 See [../shared/references/state-management.md](../shared/references/state-management.md) for the state persistence protocol.
 
 **Recovery flow:**
-1. Read `$TMPDIR/flow-marketplace/state.json`
+1. Read state: `bash "${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh" get`
 2. If `current_phase == "approved"` - use stored `prd_path` directly, skip auto-discovery
 3. Display: "Resuming from approved PRD: {feature_name} (v{version}) on branch {branch}"
-4. Update `state.json` to `current_phase: "generate-tasks"`
+4. Update phase: `bash "${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh" phase generate-tasks`
 
 ## PRD Analysis
 

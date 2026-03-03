@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Save current flow state to TMPDIR before compaction:\n\n1. Check if autonomous mode is running: read $TMPDIR/flow-marketplace/state.json\n2. If autonomous mode active:\n   - Save session metadata to $TMPDIR/flow-marketplace/session.json\n   - Save beads issue ID (if using beads) to state.json\n   - Call /flow:summary to preserve context\n3. If using beads (not autonomous): save issue ID to state.json\n4. Preserve current_phase and prd_summary in state.json (critical for context reset after PRD approval)\n5. Read $TMPDIR/flow-marketplace/prd-context.json if it exists and include prd_context in the saved state.json (branch, prd_path, timestamp from auto-discovery)\n6. Write state.json with: { mode: 'autonomous'|'manual', beads_issue_id: string|null, current_phase: string, prd_summary: object|null, prd_path: string|null, prd_context: object|null, timestamp: ISO }",
+            "prompt": "Save current flow state to TMPDIR before compaction using the flow-state.sh script:\n\nSCRIPT=\"${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh\"\n\n1. Read current state: bash \"$SCRIPT\" get\n2. If state is empty ({}), check if there is active context to save:\n   - If autonomous mode is running or beads issues are active, run: bash \"$SCRIPT\" init\n   - Then set fields as needed with: bash \"$SCRIPT\" set key=value\n3. If state already exists, update it with current context:\n   - bash \"$SCRIPT\" set beads_issue_id=<id_or_null>\n   - Preserve current_phase and prd_summary (these are critical for context reset after PRD approval)\n4. Read $TMPDIR/flow-marketplace/prd-context.json if it exists and include prd_context:\n   - bash \"$SCRIPT\" set 'prd_context={...}'\n5. Call /flow:summary to preserve context if autonomous mode is active",
             "timeout": 30
           }
         ]
@@ -14,11 +14,21 @@
     ],
     "SessionStart": [
       {
+        "matcher": "startup|compact|clear|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/export-plugin-root.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
         "matcher": "compact",
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Restore flow state after compaction:\n\n1. Read $TMPDIR/flow-marketplace/state.json\n2. If state.json exists and current_phase == 'approved':\n   - Display PRD approval summary:\n     \"PRD approved and ready for task generation.\"\n     \"Feature: {prd_summary.feature_name}\"\n     \"Version: {prd_summary.version}\"\n     \"Branch: {prd_summary.branch}\"\n     \"Requirements: {prd_summary.requirements_count}\"\n     \"PRD: {prd_path}\"\n   - If mode == 'autonomous':\n     Auto-invoke /flow:generate-tasks to continue autonomous execution\n   - If mode == 'manual':\n     Suggest: \"Run /flow:generate-tasks to create implementation tasks from the approved PRD.\"\n3. If state.json exists and mode == 'autonomous' (non-approved phase):\n   - Notify user: \"Autonomous session was interrupted by compaction. Session restored from checkpoint.\"\n   - Suggest: \"Run /flow:summary for full context refresh\"\n4. If state.json exists and beads_issue_id is set:\n   - Notify user: \"Beads issue tracking preserved. Issue ID: {beads_issue_id}\"\n5. Continue workflow based on restored state",
+            "prompt": "Restore flow state after compaction using the flow-state.sh script:\n\nSCRIPT=\"${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh\"\n\n1. Read state: bash \"$SCRIPT\" get\n2. Check current_phase: bash \"$SCRIPT\" get current_phase\n3. If current_phase == 'approved':\n   - Read prd_summary: bash \"$SCRIPT\" get prd_summary\n   - Display PRD approval summary with feature_name, version, branch, requirements_count, prd_path\n   - Check mode: bash \"$SCRIPT\" get mode\n   - If mode == 'autonomous': Auto-invoke /flow:generate-tasks to continue autonomous execution\n   - If mode == 'manual': Suggest: \"Run /flow:generate-tasks to create implementation tasks from the approved PRD.\"\n4. If mode == 'autonomous' (non-approved phase):\n   - Notify user: \"Autonomous session was interrupted by compaction. Session restored from checkpoint.\"\n   - Suggest: \"Run /flow:summary for full context refresh\"\n5. Check beads_issue_id: bash \"$SCRIPT\" get beads_issue_id\n   - If set: Notify user: \"Beads issue tracking preserved. Issue ID: {beads_issue_id}\"\n6. Continue workflow based on restored state",
             "timeout": 30
           }
         ]
@@ -28,7 +38,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Check for pending flow state from a previous session:\n\n1. Read $TMPDIR/flow-marketplace/state.json (if it exists)\n2. If state.json exists and current_phase == 'approved':\n   - Inform user: \"A previously approved PRD was found from a prior session.\"\n   - Display: \"Feature: {prd_summary.feature_name}, Version: {prd_summary.version}, Branch: {prd_summary.branch}\"\n   - Suggest: \"Run /flow:generate-tasks to generate implementation tasks, or /flow:plan to start a new plan.\"\n3. If state.json does not exist or current_phase is not 'approved': do nothing (silent)",
+            "prompt": "Check for pending flow state from a previous session using the flow-state.sh script:\n\nSCRIPT=\"${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh\"\n\n1. Read state: bash \"$SCRIPT\" get\n2. If state is not empty ({}) and current_phase == 'approved':\n   - Read prd_summary: bash \"$SCRIPT\" get prd_summary\n   - Inform user: \"A previously approved PRD was found from a prior session.\"\n   - Display: feature_name, version, branch from prd_summary\n   - Suggest: \"Run /flow:generate-tasks to generate implementation tasks, or /flow:plan to start a new plan.\"\n3. If state is empty or current_phase is not 'approved': do nothing (silent)",
             "timeout": 15
           }
         ]

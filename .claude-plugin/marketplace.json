@@ -10,7 +10,7 @@
     {
       "name": "flow",
       "description": "Complete PRD-based workflow system with autonomous orchestration for Claude Code",
-      "version": "1.1.2",
+      "version": "1.2.0",
       "source": "./plugins/flow",
       "category": "productivity",
       "tags": [

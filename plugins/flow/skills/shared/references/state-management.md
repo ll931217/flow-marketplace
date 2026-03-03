@@ -45,31 +45,69 @@ Persist flow state across Claude Code conversation compaction using TMPDIR.
 }
 ```
 
+## State Management Script
+
+**Location:** `../scripts/flow-state.sh` (relative to shared/references)
+
+All state operations MUST use this script to ensure the state file is created with the correct schema. Run via Bash tool:
+
+```bash
+bash "${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh" <command> [args]
+```
+
+### Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `init [--mode=manual\|autonomous]` | Create directory and initial state.json | `flow-state.sh init --mode=manual` |
+| `get [field]` | Read full state or a specific field | `flow-state.sh get current_phase` |
+| `set key=value [...]` | Update one or more fields | `flow-state.sh set current_phase=approved prd_path=/path/to/prd.md` |
+| `phase <name>` | Shortcut to set current_phase | `flow-state.sh phase implement` |
+| `reset` | Reset state.json to empty `{}` | `flow-state.sh reset` |
+| `session init [--session-id=<id>]` | Create session.json for autonomous mode | `flow-state.sh session init` |
+| `session clear` | Remove session.json | `flow-state.sh session clear` |
+
+### Setting JSON Values
+
+Pass JSON objects, arrays, `null`, `true`, `false`, or numbers directly:
+
+```bash
+flow-state.sh set 'prd_summary={"feature_name":"auth","version":"v1","branch":"feature/auth","requirements_count":5}'
+flow-state.sh set beads_issue_id=null
+```
+
+### When Each Skill Calls the Script
+
+| Skill | Trigger | Command |
+|-------|---------|---------|
+| plan | PRD approval | `init` then `set current_phase=approved prd_path=... prd_summary=...` |
+| generate-tasks | Start of task generation | `phase generate-tasks` |
+| implement | Start of implementation | `phase implement` |
+| autonomous | Phase 0 initialization | `init --mode=autonomous` + `session init` |
+| cleanup | After finalization | `reset` + `session clear` |
+
 ## Read Operations
 
 Before any flow command:
 
-1. Check if `$TMPDIR/flow-marketplace/state.json` exists
-2. Parse state.json
-3. Determine mode and context
-4. Resume from checkpoint if autonomous
+1. Run `flow-state.sh get` to read current state
+2. Parse the JSON output to determine mode and context
+3. Resume from checkpoint if autonomous
 
 ## Write Operations
 
 After state changes:
 
-1. Create `$TMPDIR/flow-marketplace/` if not exists
-2. Update state.json with current state
-3. Update session.json if autonomous mode
-4. Ensure atomic writes (write to temp, then rename)
+1. Run `flow-state.sh set` with the updated fields
+2. The script handles directory creation and atomic writes automatically
 
 ## Cleanup
 
 After `/flow:cleanup` completes:
 
-1. Delete `$TMPDIR/flow-marketplace/session.json`
-2. Reset `$TMPDIR/flow-marketplace/state.json` to null state
-3. Keep directory structure for next session
+1. Run `flow-state.sh session clear` to remove session.json
+2. Run `flow-state.sh reset` to reset state.json to empty
+3. Directory structure is preserved for next session
 
 ## Context Reset Protocol
 

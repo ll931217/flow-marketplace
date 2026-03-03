@@ -41,6 +41,16 @@ End-to-end autonomous implementation that transforms a feature request into work
 
 ## Phase Summary
 
+### Phase 0: Initialization
+
+Initialize state and session tracking before any phase begins:
+
+```bash
+SCRIPT="${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh"
+bash "$SCRIPT" init --mode=autonomous
+bash "$SCRIPT" session init
+```
+
 ### Phase 1: Planning (INTERACTIVE)
 
 Analyze the feature request, explore codebase patterns, ask clarifying questions, invoke the decision engine for technical choices, generate a PRD, and wait for user approval.
@@ -59,7 +69,7 @@ Run the test suite, validate PRD requirements are met, execute quality gates (li
 
 ### Phase 5: Cleanup (AUTONOMOUS)
 
-Run `/flow:cleanup` to finalize, update PRD status to `implemented`.
+Run `/flow:cleanup` to finalize, update PRD status to `implemented`. State and session files are reset by the cleanup skill.
 
 ### Phase 6: Handoff (REPORT)
 

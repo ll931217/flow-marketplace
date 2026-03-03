@@ -126,14 +126,29 @@ Present Summary + Review Checklist
 
 **After approval (interactive mode):**
 1. Update PRD status: `draft` --> `approved`
-2. Save state to `$TMPDIR/flow-marketplace/state.json`
+2. Initialize and persist state to TMPDIR:
+   ```bash
+   SCRIPT="${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh"
+   bash "$SCRIPT" init --mode=manual
+   bash "$SCRIPT" set current_phase=approved \
+     prd_path="<absolute_path_to_prd>" \
+     'prd_summary={"feature_name":"<name>","version":"<version>","branch":"<branch>","requirements_count":<N>,"approval_timestamp":"<ISO>"}'
+   ```
 3. Display approval confirmation
 4. Recommend `/compact` then `/flow:generate-tasks`
 5. **STOP** - Do not proceed further. Wait for user action.
 
 **After approval (autonomous mode):**
-1. Update PRD status and save state
-2. Continue directly to `/flow:generate-tasks`
+1. Update PRD status: `draft` --> `approved`
+2. Initialize and persist state:
+   ```bash
+   SCRIPT="${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh"
+   bash "$SCRIPT" init --mode=autonomous
+   bash "$SCRIPT" set current_phase=approved \
+     prd_path="<absolute_path_to_prd>" \
+     'prd_summary={"feature_name":"<name>","version":"<version>","branch":"<branch>","requirements_count":<N>,"approval_timestamp":"<ISO>"}'
+   ```
+3. Continue directly to `/flow:generate-tasks`
 
 ## PRD Review Checklist
 

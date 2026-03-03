@@ -71,6 +71,7 @@ See [../shared/references/prd-discovery.md](../shared/references/prd-discovery.m
 1. Run `/flow:summary` to capture initial state
 2. Check `code_references` in PRD frontmatter for initial context
 3. Update PRD status from `approved` to `implementing`
+4. Update flow state: `bash "${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh" phase implement`
 
 ## Task Execution Loop
 
