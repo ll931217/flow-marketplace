@@ -33,7 +33,7 @@ See [../shared/references/prd-discovery.md](../shared/references/prd-discovery.m
 
 **After discovery:** Display PRD metadata and confirm with user before proceeding.
 
-## TMPDIR Recovery
+## State Recovery
 
 Before PRD discovery, check for a context reset after PRD approval.
 
@@ -113,7 +113,7 @@ See [references/context-discovery.md](references/context-discovery.md) for:
 | Reference | Purpose |
 |-----------|---------|
 | [PRD Discovery](../shared/references/prd-discovery.md) | Multi-stage PRD auto-discovery algorithm |
-| [State Management](../shared/references/state-management.md) | TMPDIR persistence across context resets |
+| [State Management](../shared/references/state-management.md) | State persistence across context resets |
 | [TDD Principles](../shared/references/tdd-principles.md) | Test-driven development guidelines |
 | [PRD Change Management](../shared/references/prd-change-management.md) | PRD versioning and update tracking |
 

@@ -115,7 +115,7 @@ Generate PRD v1
      |
 Present Summary + Review Checklist
      |
-     +-- "Yes, approve" --> Update status to approved --> Save state to TMPDIR
+     +-- "Yes, approve" --> Update status to approved --> Save state
      |
      +-- "Review full PRD" --> Show file path --> Re-ask after review
      |
@@ -126,7 +126,7 @@ Present Summary + Review Checklist
 
 **After approval (interactive mode):**
 1. Update PRD status: `draft` --> `approved`
-2. Initialize and persist state to TMPDIR:
+2. Initialize and persist state:
    ```bash
    SCRIPT="${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh"
    bash "$SCRIPT" init --mode=manual
@@ -172,7 +172,7 @@ After PRD approval and before implementation, generate failing tests for each fu
 ## Shared References
 
 - [PRD Auto-Discovery Protocol](../shared/references/prd-discovery.md) - Multi-stage algorithm for finding PRDs by git context
-- [State Management Protocol](../shared/references/state-management.md) - Persist flow state across context compaction via TMPDIR
+- [State Management Protocol](../shared/references/state-management.md) - Persist flow state across context compaction
 - [Auto-Compaction Detection](../shared/references/auto-compaction-detection.md) - Maintain accurate context about PRD status and task progress
 
 ## Complexity Guidance

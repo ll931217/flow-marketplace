@@ -112,7 +112,7 @@ After all cleanup steps complete, the PRD frontmatter is updated:
 
 ## State Cleanup
 
-After all PRD status updates are complete, reset the TMPDIR state files:
+After all PRD status updates are complete, reset the flow state files:
 
 ```bash
 SCRIPT="${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh"

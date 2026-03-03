@@ -159,9 +159,9 @@ decision_engine:
 }
 ```
 
-### TMPDIR State Files
+### Project-Local State Files
 
-Located at `$TMPDIR/flow-marketplace/`:
+Located at `.flow/state/` (falls back to `${TMPDIR:-/tmp}/flow-marketplace/` outside git repos):
 
 **state.json** (cross-compaction persistence):
 ```json

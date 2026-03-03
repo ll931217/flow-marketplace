@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Persist flow state across Claude Code conversation compaction using TMPDIR.
+Persist flow state across Claude Code conversation compaction using project-local state directory.
 
 ## State Directory
 
-**Location:** `$TMPDIR/flow-marketplace/`
+**Location:** `.flow/state/` (project-local, falls back to `${TMPDIR:-/tmp}/flow-marketplace/` outside git repos)
 
 **Files:**
 - `state.json` - Current flow state
@@ -138,7 +138,6 @@ In autonomous mode, no manual compact is needed. State is saved at the Phase 2â†
 
 ## Fallback Behavior
 
-If TMPDIR is not writable:
-- Log warning
-- Fall back to in-memory state only
-- Notify user that persistence is unavailable
+**Non-git environment:** Falls back to `${TMPDIR:-/tmp}/flow-marketplace/` when not inside a git repository.
+
+**Legacy migration:** Read operations check `.flow/state/` first, then fall back to `${TMPDIR:-/tmp}/flow-marketplace/`. All writes go to the new location. Legacy files are cleaned on `reset` and `session clear`.

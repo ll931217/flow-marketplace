@@ -70,7 +70,7 @@ fi
 [[ -n "$MATCHED_PRD" ]] || json_ok
 
 # --- Write prd-context.json ---
-OUT_DIR="${TMPDIR:-/tmp}/flow-marketplace"
+OUT_DIR="$PROJECT_ROOT/.flow/state"
 mkdir -p "$OUT_DIR"
 
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")

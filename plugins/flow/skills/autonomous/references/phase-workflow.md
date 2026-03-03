@@ -71,11 +71,11 @@ All Maestro output uses the `[Maestro]` prefix:
 
 After PRD approval, save state before continuing:
 
-1. Write `$TMPDIR/flow-marketplace/state.json` with:
+1. Write `.flow/state/state.json` with:
    - `current_phase: "approved"`
    - `prd_path` pointing to approved PRD
    - `prd_summary` with feature_name, version, branch, requirements_count, approval_timestamp
-2. Log: `[Maestro] -> State saved to TMPDIR (compaction resilience)`
+2. Log: `[Maestro] -> State saved (compaction resilience)`
 3. Continue directly to Phase 3
 
 **Compaction Recovery:** If auto-compaction triggers between Phase 2 and Phase 3, the SessionStart hook detects `current_phase == "approved"` with `mode == "autonomous"` and auto-invokes `/flow:generate-tasks` to resume.
@@ -87,7 +87,7 @@ After PRD approval, save state before continuing:
 **Mode:** AUTONOMOUS - no human interaction.
 
 **Actions:**
-1. Recovery check: if entering after auto-compaction with `current_phase == "approved"`, use stored `prd_path` from TMPDIR state
+1. Recovery check: if entering after auto-compaction with `current_phase == "approved"`, use stored `prd_path` from persisted state
 2. Read the approved PRD and parse requirements
 3. Generate 5-7 high-level epics based on requirements
 4. Generate detailed sub-tasks with dependencies
@@ -100,7 +100,7 @@ After PRD approval, save state before continuing:
 **Log Example:**
 ```
 [Maestro] Phase 2: Task Generation
-[Maestro]   -> State recovered from TMPDIR (if post-compaction)
+[Maestro]   -> State recovered (if post-compaction)
 [Maestro]   -> Created 6 epics with 23 sub-tasks
 [Maestro]   -> Ordered into 4 parallel groups
 [Maestro] OK Tasks ready for execution

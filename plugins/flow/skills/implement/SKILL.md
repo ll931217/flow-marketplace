@@ -132,7 +132,7 @@ See [../shared/references/tdd-principles.md](../shared/references/tdd-principles
 
 ## State Management
 
-Persist flow state across Claude Code conversation compaction using TMPDIR.
+Persist flow state across Claude Code conversation compaction using project-local state.
 
 See [../shared/references/state-management.md](../shared/references/state-management.md) for the state schema, read/write operations, and context reset protocol.
 

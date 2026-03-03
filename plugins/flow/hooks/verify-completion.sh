@@ -33,7 +33,11 @@ if [ -f "$TRANSCRIPT" ]; then
 fi
 
 # --- shared directory ---
-COUNTER_DIR="${TMPDIR:-/tmp}/flow-marketplace"
+if PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null); then
+  COUNTER_DIR="$PROJECT_ROOT/.flow/state"
+else
+  COUNTER_DIR="${TMPDIR:-/tmp}/flow-marketplace"
+fi
 mkdir -p "$COUNTER_DIR"
 
 # --- skip if no implementation detected ---
@@ -41,6 +45,10 @@ HAS_IMPLEMENTATION=false
 
 # Check 1: Flow state indicates active implementation phase
 STATE_FILE="${COUNTER_DIR}/state.json"
+if [ ! -f "$STATE_FILE" ]; then
+  LEGACY_STATE="${TMPDIR:-/tmp}/flow-marketplace/state.json"
+  [ -f "$LEGACY_STATE" ] && STATE_FILE="$LEGACY_STATE"
+fi
 if [ -f "$STATE_FILE" ]; then
   PHASE=$(jq -r '.current_phase // ""' "$STATE_FILE" 2>/dev/null)
   case "$PHASE" in
@@ -129,7 +137,7 @@ Before stopping, verify ALL work is truly complete and emit the done signal:
 
 1. Check TodoWrite tasks — any pending/in-progress items? Continue working.
 2. Check Beads issues — run \`bd list --status=open\` if applicable.
-3. Check Flow State — read \${TMPDIR}/flow-marketplace/state.json if it exists.
+3. Check Flow State — run \`flow-state.sh get\` to check current state.
 4. Verify implementation — tests passing, build successful, changes committed.
 
 When ALL tasks are complete, include this marker in your response:
@@ -140,4 +148,4 @@ fi
 
 # --- output block decision ---
 jq -n --arg reason "$REASON" \
-  '{ hookSpecificOutput: { hookEventName: "Stop", permissionDecision: "deny", permissionDecisionReason: $stopReason } }'
+  '{ hookSpecificOutput: { hookEventName: "Stop", permissionDecision: "deny", permissionDecisionReason: $reason } }'

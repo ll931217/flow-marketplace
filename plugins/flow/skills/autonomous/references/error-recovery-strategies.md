@@ -205,6 +205,6 @@ Iteration 3 (if needed):
 If Maestro is interrupted entirely (process killed, crash):
 
 1. Check `.flow/maestro/sessions/<session-id>/metadata.json` for last status
-2. Check `$TMPDIR/flow-marketplace/state.json` for phase state
+2. Check `.flow/state/state.json` for phase state
 3. Check `checkpoints.json` for available rollback points
 4. Resume from the last successful checkpoint

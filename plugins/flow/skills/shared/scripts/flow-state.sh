@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# flow-state.sh - Manage $TMPDIR/flow-marketplace/state.json and session.json
+# flow-state.sh - Manage .flow/state/state.json and session.json
 #
 # Usage:
 #   flow-state.sh init [--mode=manual|autonomous]
@@ -13,12 +13,30 @@
 #
 set -euo pipefail
 
-STATE_DIR="${TMPDIR:-/tmp}/flow-marketplace"
+# Resolve state directory: project-local .flow/state/ or TMPDIR fallback
+if PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null); then
+  STATE_DIR="$PROJECT_ROOT/.flow/state"
+else
+  STATE_DIR="${TMPDIR:-/tmp}/flow-marketplace"
+fi
+LEGACY_DIR="${TMPDIR:-/tmp}/flow-marketplace"
 STATE_FILE="$STATE_DIR/state.json"
 SESSION_FILE="$STATE_DIR/session.json"
 
 ensure_dir() {
   mkdir -p "$STATE_DIR"
+}
+
+# Read-fallback: check new location first, then legacy TMPDIR
+resolve_state_file() {
+  local filename="$1"
+  if [[ -f "$STATE_DIR/$filename" ]]; then
+    echo "$STATE_DIR/$filename"
+  elif [[ -f "$LEGACY_DIR/$filename" ]]; then
+    echo "$LEGACY_DIR/$filename"
+  else
+    echo "$STATE_DIR/$filename"
+  fi
 }
 
 timestamp() {
@@ -51,21 +69,23 @@ EOF
 
 # --- get: Read state or a specific field ---
 cmd_get() {
-  if [[ ! -f "$STATE_FILE" ]]; then
+  local effective_file
+  effective_file=$(resolve_state_file "state.json")
+  if [[ ! -f "$effective_file" ]]; then
     echo '{}'
     return 0
   fi
 
   local field="${1:-}"
   if [[ -z "$field" ]]; then
-    cat "$STATE_FILE"
+    cat "$effective_file"
   else
     if command -v jq &>/dev/null; then
-      jq -r ".$field // empty" "$STATE_FILE"
+      jq -r ".$field // empty" "$effective_file"
     elif command -v python3 &>/dev/null; then
       python3 -c "
 import json, sys
-state = json.load(open('$STATE_FILE'))
+state = json.load(open('$effective_file'))
 keys = '$field'.split('.')
 val = state
 for k in keys:
@@ -86,9 +106,15 @@ print(val if not isinstance(val, (dict, list)) else json.dumps(val))
 cmd_set() {
   ensure_dir
 
-  # If state.json doesn't exist, create minimal one first
-  if [[ ! -f "$STATE_FILE" ]]; then
+  # Read from resolved location (new or legacy), always write to new
+  local effective_file
+  effective_file=$(resolve_state_file "state.json")
+  if [[ ! -f "$effective_file" ]]; then
     echo '{}' > "$STATE_FILE"
+    effective_file="$STATE_FILE"
+  elif [[ "$effective_file" != "$STATE_FILE" ]]; then
+    cp "$effective_file" "$STATE_FILE"
+    effective_file="$STATE_FILE"
   fi
 
   if command -v jq &>/dev/null; then
@@ -152,6 +178,8 @@ cmd_reset() {
   cat > "$STATE_FILE" <<EOF
 {}
 EOF
+  # Clean legacy state
+  [[ -f "$LEGACY_DIR/state.json" ]] && rm -f "$LEGACY_DIR/state.json"
   echo "State reset"
 }
 
@@ -184,12 +212,10 @@ EOF
       ;;
 
     clear)
-      if [[ -f "$SESSION_FILE" ]]; then
-        rm -f "$SESSION_FILE"
-        echo "Session cleared"
-      else
-        echo "No session file to clear"
-      fi
+      rm -f "$SESSION_FILE"
+      # Clean legacy session
+      [[ -f "$LEGACY_DIR/session.json" ]] && rm -f "$LEGACY_DIR/session.json"
+      echo "Session cleared"
       ;;
 
     *)

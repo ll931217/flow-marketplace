@@ -97,7 +97,7 @@ For the recovery matrix, retry logic, and rollback procedures, see [references/e
 
 ## State Persistence
 
-Autonomous mode persists state across compaction using `$TMPDIR/flow-marketplace/`. State is saved at the Phase 1-to-Phase 2 boundary for resilience against auto-compaction. Session metadata, decisions, and checkpoints are stored in `.flow/maestro/sessions/<session-id>/`.
+Autonomous mode persists state across compaction using project-local `.flow/state/`. State is saved at the Phase 1-to-Phase 2 boundary for resilience against auto-compaction. Session metadata, decisions, and checkpoints are stored in `.flow/maestro/sessions/<session-id>/`.
 
 For the full state management protocol, see [../shared/references/state-management.md](../shared/references/state-management.md).
 
@@ -158,7 +158,7 @@ Maestro orchestrates existing flow commands in sequence:
 3. **Use the decision engine** for all technical choices - never guess
 4. **Create git checkpoints** at phase boundaries for safe rollback
 5. **Iterate on failures** up to 3 times before reporting to user
-6. **Persist state** to TMPDIR at phase boundaries for compaction resilience
+6. **Persist state** at phase boundaries for compaction resilience
 
 ## Prerequisites
 
