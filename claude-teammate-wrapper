@@ -1,0 +1,71 @@
+#!/bin/bash
+# Wrapper that fixes agent-teams teammate spawning.
+#
+# Problem: Teammates are launched without a prompt argument, causing:
+#   "Error: Input must be provided either through stdin or as a prompt argument when using --print"
+#   The CLI requires either a prompt argument, --resume, or --sdkUrl.
+#
+# Solution: Read the initial prompt from the teammate's inbox file and pass it
+#   as a positional prompt argument to the real binary.
+#
+# Usage: Set CLAUDE_CODE_TEAMMATE_COMMAND to this script's path.
+# See: https://github.com/anthropics/claude-code/issues/25193
+
+set -euo pipefail
+
+REAL_BINARY="$(readlink -f "$HOME/.local/bin/claude")"
+TEAMS_DIR="$HOME/.claude/teams"
+
+# Parse --agent-name and --team-name from args
+agent_name=""
+team_name=""
+args=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --agent-name)
+      agent_name="$2"
+      args+=("$1" "$2")
+      shift 2
+      ;;
+    --team-name)
+      team_name="$2"
+      args+=("$1" "$2")
+      shift 2
+      ;;
+    *)
+      args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# If we have both agent-name and team-name, try to read the inbox prompt
+if [[ -n "$agent_name" && -n "$team_name" ]]; then
+  inbox_file="$TEAMS_DIR/$team_name/inboxes/$agent_name.json"
+
+  if [[ -f "$inbox_file" ]]; then
+    # Extract the first unread message text using jq or python3
+    prompt=""
+    if command -v jq &>/dev/null; then
+      prompt=$(jq -r '[.[] | select(.read == false)][0].text // empty' "$inbox_file" 2>/dev/null)
+    elif command -v python3 &>/dev/null; then
+      prompt=$(python3 -c "
+import json, sys
+msgs = json.load(open('$inbox_file'))
+unread = [m for m in msgs if not m.get('read', True)]
+if unread:
+    print(unread[0]['text'])
+" 2>/dev/null)
+    fi
+
+    if [[ -n "$prompt" ]]; then
+      # Pass the inbox prompt as a positional argument (the CLI's prompt parameter)
+      # This satisfies the "H" check: if(!H && !X && !F) in the print mode validator
+      exec "$REAL_BINARY" "${args[@]}" -p "$prompt"
+    fi
+  fi
+fi
+
+# Fallback: run normally (no inbox found or no unread messages)
+exec "$REAL_BINARY" "${args[@]}"
