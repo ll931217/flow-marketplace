@@ -43,16 +43,16 @@ PostgreSQL + pgvector MCP server for codebase indexing and semantic search. Inde
 
 ### Quick Install (Recommended)
 
-Install both plugins with a single command:
-
+Install marketplace:
 ```bash
-claude plugin install https://github.com/ll931217/flow-marketplace
+claude plugin marketplace add ll931217/flow-marketplace
+claude plugin install flow@flow-marketplace
 ```
 
-Or use the `/plugin` command within Claude Code:
-
-```
-/plugin install https://github.com/ll931217/flow-marketplace
+Or through Claude Code:
+```bash
+/plugin marketplace add https://github.com/ll931217/flow-marketplace
+/plugin install flow@flow-marketplace
 ```
 
 ### What Happens During Installation
