@@ -101,12 +101,24 @@ if [ -n "$LAST_MSG" ]; then
       HAS_DONE_SIGNAL=true
     fi
   fi
+  # Accept ANY FLOW_DONE:: pattern (agent rarely knows the exact nonce)
+  if [ "$HAS_DONE_SIGNAL" = false ]; then
+    if echo "$LAST_MSG" | grep -qE 'FLOW_DONE::[a-zA-Z0-9_-]+' 2>/dev/null; then
+      HAS_DONE_SIGNAL=true
+    fi
+  fi
 fi
 
 # Fallback: check transcript file
 if [ "$HAS_DONE_SIGNAL" = false ] && [ -f "$TRANSCRIPT" ]; then
   if tail -400 "$TRANSCRIPT" 2>/dev/null | grep -Fq "$DONE_SIGNAL"; then
     HAS_DONE_SIGNAL=true
+  fi
+  # Accept ANY FLOW_DONE:: pattern in transcript
+  if [ "$HAS_DONE_SIGNAL" = false ]; then
+    if tail -400 "$TRANSCRIPT" 2>/dev/null | grep -qE 'FLOW_DONE::[a-zA-Z0-9_-]+'; then
+      HAS_DONE_SIGNAL=true
+    fi
   fi
 
   # Check for recent errors
