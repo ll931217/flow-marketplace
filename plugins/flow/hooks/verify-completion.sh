@@ -3,10 +3,12 @@
 # Stop hook: Block stop until agent explicitly confirms completion.
 #
 # The stop is allowed only after the transcript contains:
-#   FLOW_DONE::<session_id>
+#   FLOW_DONE::<session_id>  OR  FLOW_DONE::<nonce>
+#
+# A fresh nonce is generated per attempt to bust LLM proxy caches (e.g. LiteLLM).
 #
 # Optional env vars:
-#   FLOW_VERIFY_MAX   Max blocks before allowing stop (default: 0 = infinite)
+#   FLOW_VERIFY_MAX   Max blocks before allowing stop (default: 5)
 #
 set -u
 
@@ -69,12 +71,16 @@ fi
 
 # --- counter ---
 COUNTER_FILE="${COUNTER_DIR}/verify-counter-${SESSION_ID}"
-MAX=${FLOW_VERIFY_MAX:-0}
+MAX=${FLOW_VERIFY_MAX:-5}
 
 COUNT=0
 if [ -f "$COUNTER_FILE" ]; then
   COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo "0")
 fi
+
+# --- per-attempt nonce (busts LLM proxy caches like LiteLLM) ---
+NONCE=$(head -c 6 /dev/urandom 2>/dev/null | od -An -tx1 | tr -d ' \n' || date +%s%N)
+NONCE_FILE="${COUNTER_DIR}/verify-nonce-${SESSION_ID}"
 
 # --- done signal detection ---
 DONE_SIGNAL="FLOW_DONE::${SESSION_ID}"
@@ -83,8 +89,18 @@ HAS_RECENT_ERRORS=false
 
 # Primary: check last_assistant_message (most reliable)
 LAST_MSG=$(echo "$INPUT" | jq -r '.last_assistant_message // ""')
-if [ -n "$LAST_MSG" ] && echo "$LAST_MSG" | grep -Fq "$DONE_SIGNAL" 2>/dev/null; then
-  HAS_DONE_SIGNAL=true
+if [ -n "$LAST_MSG" ]; then
+  # Accept exact session_id match
+  if echo "$LAST_MSG" | grep -Fq "$DONE_SIGNAL" 2>/dev/null; then
+    HAS_DONE_SIGNAL=true
+  fi
+  # Accept previous attempt's nonce
+  if [ "$HAS_DONE_SIGNAL" = false ] && [ -f "$NONCE_FILE" ]; then
+    PREV_NONCE=$(cat "$NONCE_FILE" 2>/dev/null)
+    if [ -n "$PREV_NONCE" ] && echo "$LAST_MSG" | grep -Fq "FLOW_DONE::${PREV_NONCE}" 2>/dev/null; then
+      HAS_DONE_SIGNAL=true
+    fi
+  fi
 fi
 
 # Fallback: check transcript file
@@ -99,9 +115,12 @@ if [ "$HAS_DONE_SIGNAL" = false ] && [ -f "$TRANSCRIPT" ]; then
   fi
 fi
 
+# Write current nonce for next attempt's validation
+echo "$NONCE" >"$NONCE_FILE"
+
 # --- allow stop if done signal found ---
 if [ "$HAS_DONE_SIGNAL" = true ]; then
-  rm -f "$COUNTER_FILE"
+  rm -f "$COUNTER_FILE" "$NONCE_FILE"
   allow_stop
 fi
 
@@ -111,7 +130,7 @@ echo "$NEXT" >"$COUNTER_FILE"
 
 # --- optional escape hatch ---
 if [ "$MAX" -gt 0 ] && [ "$NEXT" -ge "$MAX" ]; then
-  rm -f "$COUNTER_FILE"
+  rm -f "$COUNTER_FILE" "$NONCE_FILE"
   allow_stop
 fi
 
@@ -128,8 +147,11 @@ else
   LABEL="FLOW_VERIFY (${NEXT})"
 fi
 
+# Cache-bust fingerprint: unique per session/attempt to defeat LiteLLM proxy caching
+FINGERPRINT="[session=${SESSION_ID} ts=$(date +%s) attempt=${NEXT} nonce=${NONCE}]"
+
 if [ "$NEXT" -eq 1 ]; then
-  REASON="${LABEL}: ${PREAMBLE}
+  REASON="${FINGERPRINT} ${LABEL}: ${PREAMBLE}
 
 ## Task Completion Verification
 
@@ -140,10 +162,10 @@ Before stopping, verify ALL work is truly complete and emit the done signal:
 3. Check Flow State — run \`flow-state.sh get\` to check current state.
 4. Verify implementation — tests passing, build successful, changes committed.
 
-When ALL tasks are complete, include this marker in your response:
-\`FLOW_DONE::${SESSION_ID}\`"
+When ALL tasks are complete, include this EXACT marker in your response (copy-paste, do NOT generate your own UUID):
+\`FLOW_DONE::${NONCE}\`"
 else
-  REASON="${LABEL}: ${PREAMBLE} Emit \`FLOW_DONE::${SESSION_ID}\` when done."
+  REASON="${FINGERPRINT} ${LABEL}: ${PREAMBLE} Include this EXACT marker: \`FLOW_DONE::${NONCE}\` [nonce=${NONCE}]"
 fi
 
 # --- output block decision ---

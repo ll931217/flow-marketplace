@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.0]
+
+### Fixed
+- **Stop hook LLM cache compatibility**: Generate per-attempt nonce in verify-completion hook to bust LLM proxy caches (e.g. LiteLLM Gateway). Accept either session UUID or nonce as valid done signal, preventing infinite block loops from cached responses
+- **Stop hook default MAX**: Changed `FLOW_VERIFY_MAX` default from 0 (infinite) to 5, ensuring an escape hatch even when the agent fails to emit the done signal
+
 ## [2.1.0]
 
 ### Fixed

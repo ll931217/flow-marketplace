@@ -30,7 +30,7 @@ content=$(cat "$READ_FILE")
 # Update last_session_exit timestamp using jq (or python fallback)
 mkdir -p "$STATE_DIR"
 if command -v jq &>/dev/null; then
-  echo "$content" | jq --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.last_session_exit = $ts' > "$STATE_FILE"
+  echo "$content" | jq --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '.last_session_exit = $ts' >"$STATE_FILE"
 elif command -v python3 &>/dev/null; then
   python3 -c "
 import json, sys
@@ -38,7 +38,7 @@ from datetime import datetime, timezone
 state = json.loads(sys.stdin.read())
 state['last_session_exit'] = datetime.now(timezone.utc).isoformat()
 print(json.dumps(state, indent=2))
-" <<< "$content" > "$STATE_FILE"
+" <<<"$content" >"$STATE_FILE"
 fi
 
 json_ok
