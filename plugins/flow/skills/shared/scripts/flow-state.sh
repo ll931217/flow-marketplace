@@ -10,6 +10,10 @@
 #   flow-state.sh reset
 #   flow-state.sh session init [--session-id=<id>]
 #   flow-state.sh session clear
+#   flow-state.sh session get
+#   flow-state.sh prd_context set --branch=<branch> --prd_path=<path> --worktree=<bool>
+#   flow-state.sh prd_context get
+#   flow-state.sh prd_context clear
 #
 set -euo pipefail
 
@@ -61,7 +65,8 @@ cmd_init() {
   "prd_path": null,
   "current_phase": "plan",
   "prd_summary": null,
-  "prd_context": null
+  "prd_context": null,
+  "session": null
 }
 EOF
   echo "State initialized: mode=$mode"
@@ -183,9 +188,9 @@ EOF
   echo "State reset"
 }
 
-# --- session: Manage session.json for autonomous mode ---
+# --- session: Manage session data in state.json ---
 cmd_session() {
-  local subcmd="${1:?Usage: flow-state.sh session init|clear}"
+  local subcmd="${1:?Usage: flow-state.sh session init|clear|get}"
   shift
 
   case "$subcmd" in
@@ -199,28 +204,35 @@ cmd_session() {
       done
 
       ensure_dir
-      cat > "$SESSION_FILE" <<EOF
-{
-  "session_id": "$session_id",
-  "start_time": "$(timestamp)",
-  "decisions_log": [],
-  "checkpoints": [],
-  "current_phase": "plan"
-}
+      local session_data
+      session_data=$(cat <<EOF
+{"session_id":"$session_id","start_time":"$(timestamp)","decisions_log":[],"checkpoints":[],"current_phase":"plan"}
 EOF
+)
+      cmd_set "session=$session_data"
+
+      # Clean legacy session file if it exists
+      rm -f "$SESSION_FILE"
+      [[ -f "$LEGACY_DIR/session.json" ]] && rm -f "$LEGACY_DIR/session.json"
+
       echo "Session initialized: $session_id"
       ;;
 
     clear)
+      cmd_set "session=null"
+      # Clean legacy session files
       rm -f "$SESSION_FILE"
-      # Clean legacy session
       [[ -f "$LEGACY_DIR/session.json" ]] && rm -f "$LEGACY_DIR/session.json"
       echo "Session cleared"
       ;;
 
+    get)
+      cmd_get "session"
+      ;;
+
     *)
       echo "Unknown session subcommand: $subcmd" >&2
-      echo "Usage: flow-state.sh session init|clear" >&2
+      echo "Usage: flow-state.sh session init|clear|get" >&2
       return 1
       ;;
   esac
@@ -309,21 +321,83 @@ with open('$STATE_FILE', 'w') as f: json.dump(state, f, indent=2)
   esac
 }
 
+# --- prd_context: Manage PRD context in state.json ---
+cmd_prd_context() {
+  local subcmd="${1:?Usage: flow-state.sh prd_context set|get|clear}"
+  shift
+
+  case "$subcmd" in
+    set)
+      local branch="" prd_path="" worktree="false"
+      for arg in "$@"; do
+        case "$arg" in
+          --branch=*) branch="${arg#--branch=}" ;;
+          --prd_path=*) prd_path="${arg#--prd_path=}" ;;
+          --worktree=*) worktree="${arg#--worktree=}" ;;
+        esac
+      done
+
+      if [[ -z "$branch" || -z "$prd_path" ]]; then
+        echo "Error: --branch and --prd_path are required" >&2
+        echo "Usage: flow-state.sh prd_context set --branch=<branch> --prd_path=<path> --worktree=<bool>" >&2
+        return 1
+      fi
+
+      ensure_dir
+      local timestamp
+      timestamp=$(timestamp)
+      local prd_context_data
+      prd_context_data=$(cat <<EOF
+{"branch":"$branch","prd_path":"$prd_path","worktree":$worktree,"timestamp":"$timestamp"}
+EOF
+)
+      cmd_set "prd_context=$prd_context_data"
+
+      # Clean legacy prd-context.json if it exists
+      local legacy_prd_context="$STATE_DIR/prd-context.json"
+      rm -f "$legacy_prd_context"
+      [[ -f "$LEGACY_DIR/prd-context.json" ]] && rm -f "$LEGACY_DIR/prd-context.json"
+
+      echo "PRD context set: branch=$branch, prd_path=$prd_path, worktree=$worktree"
+      ;;
+
+    get)
+      cmd_get "prd_context"
+      ;;
+
+    clear)
+      cmd_set "prd_context=null"
+      # Clean legacy prd-context.json
+      local legacy_prd_context="$STATE_DIR/prd-context.json"
+      rm -f "$legacy_prd_context"
+      [[ -f "$LEGACY_DIR/prd-context.json" ]] && rm -f "$LEGACY_DIR/prd-context.json"
+      echo "PRD context cleared"
+      ;;
+
+    *)
+      echo "Unknown prd_context subcommand: $subcmd" >&2
+      echo "Usage: flow-state.sh prd_context set|get|clear" >&2
+      return 1
+      ;;
+  esac
+}
+
 # --- main dispatch ---
-cmd="${1:?Usage: flow-state.sh <init|get|set|phase|reset|session|team> [args]}"
+cmd="${1:?Usage: flow-state.sh <init|get|set|phase|reset|session|team|prd_context> [args]}"
 shift
 
 case "$cmd" in
-  init)    cmd_init "$@" ;;
-  get)     cmd_get "$@" ;;
-  set)     cmd_set "$@" ;;
-  phase)   cmd_phase "$@" ;;
-  reset)   cmd_reset "$@" ;;
-  session) cmd_session "$@" ;;
-  team)    cmd_team "$@" ;;
+  init)        cmd_init "$@" ;;
+  get)         cmd_get "$@" ;;
+  set)         cmd_set "$@" ;;
+  phase)       cmd_phase "$@" ;;
+  reset)       cmd_reset "$@" ;;
+  session)     cmd_session "$@" ;;
+  team)        cmd_team "$@" ;;
+  prd_context) cmd_prd_context "$@" ;;
   *)
     echo "Unknown command: $cmd" >&2
-    echo "Usage: flow-state.sh <init|get|set|phase|reset|session|team> [args]" >&2
+    echo "Usage: flow-state.sh <init|get|set|phase|reset|session|team|prd_context> [args]" >&2
     exit 1
     ;;
 esac

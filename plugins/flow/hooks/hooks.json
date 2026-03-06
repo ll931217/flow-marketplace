@@ -5,8 +5,8 @@
         "matcher": "",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Save current flow state before compaction using the flow-state.sh script:\n\nSCRIPT=\"${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh\"\n\n1. Read current state: bash \"$SCRIPT\" get\n2. If state is empty ({}), check if there is active context to save:\n   - If autonomous mode is running or beads issues are active, run: bash \"$SCRIPT\" init\n   - Then set fields as needed with: bash \"$SCRIPT\" set key=value\n3. If state already exists, update it with current context:\n   - bash \"$SCRIPT\" set beads_issue_id=<id_or_null>\n   - Preserve current_phase and prd_summary (these are critical for context reset after PRD approval)\n4. Read prd-context.json if it exists and include prd_context:\n   - bash \"$SCRIPT\" get prd_context\n   - If empty, check prd-context.json: cat \"$(git rev-parse --show-toplevel 2>/dev/null)/.flow/state/prd-context.json\" 2>/dev/null\n   - If found, set it: bash \"$SCRIPT\" set 'prd_context={...}'\n5. Call /flow:summary to preserve context if autonomous mode is active",
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/precompact-prompt.sh",
             "timeout": 30
           }
         ]
@@ -27,8 +27,8 @@
         "matcher": "compact",
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Restore flow state after compaction using the flow-state.sh script:\n\nSCRIPT=\"${FLOW_PLUGIN_ROOT}/skills/shared/scripts/flow-state.sh\"\n\n1. Read state: bash \"$SCRIPT\" get\n2. Check current_phase: bash \"$SCRIPT\" get current_phase\n3. If current_phase == 'approved':\n   - Read prd_summary: bash \"$SCRIPT\" get prd_summary\n   - Display PRD approval summary with feature_name, version, branch, requirements_count, prd_path\n   - Check mode: bash \"$SCRIPT\" get mode\n   - If mode == 'autonomous': Auto-invoke /flow:generate-tasks to continue autonomous execution\n   - If mode == 'manual': Suggest: \"Run /flow:generate-tasks to create implementation tasks from the approved PRD.\"\n4. If mode == 'autonomous' (non-approved phase):\n   - Notify user: \"Autonomous session was interrupted by compaction. Session restored from checkpoint.\"\n   - Suggest: \"Run /flow:summary for full context refresh\"\n5. Check beads_issue_id: bash \"$SCRIPT\" get beads_issue_id\n   - If set: Notify user: \"Beads issue tracking preserved. Issue ID: {beads_issue_id}\"\n6. Check team_state: bash \"$SCRIPT\" get team_state\n   - If team_state.active_team is set:\n     - Notify user: \"Active team detected: {active_team} for {current_group}\"\n     - Check if team is still alive via TaskList\n     - If alive: Resume team monitoring\n     - If dead: Run bash \"$SCRIPT\" team clear to clean up stale state\n7. Continue workflow based on restored state",
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/postcompact-prompt.sh",
             "timeout": 30
           }
         ]

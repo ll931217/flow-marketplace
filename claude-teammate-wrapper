@@ -21,6 +21,11 @@ agent_name=""
 team_name=""
 args=()
 
+# Add model from environment variable if set
+if [[ -n "${ANTHROPIC_MODEL:-}" ]]; then
+  args+=("--model" "$ANTHROPIC_MODEL")
+fi
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --agent-name)

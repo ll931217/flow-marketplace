@@ -66,27 +66,18 @@ if [[ -z "$MATCHED_PRD" ]]; then
   done
 fi
 
-# No match → exit silently (don't overwrite existing prd-context.json)
+# No match → exit silently (don't overwrite existing prd-context)
 [[ -n "$MATCHED_PRD" ]] || json_ok
 
-# --- Write prd-context.json ---
-OUT_DIR="$PROJECT_ROOT/.flow/state"
-mkdir -p "$OUT_DIR"
+# --- Write prd_context to state.json via flow-state.sh ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT="$SCRIPT_DIR/../skills/shared/scripts/flow-state.sh"
 
-TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-if command -v jq &>/dev/null; then
-  jq -n \
-    --arg branch "$BRANCH" \
-    --arg prd_path "$MATCHED_PRD" \
-    --argjson worktree "$IS_WORKTREE" \
-    --arg timestamp "$TIMESTAMP" \
-    '{branch: $branch, prd_path: $prd_path, worktree: $worktree, timestamp: $timestamp}' \
-    > "$OUT_DIR/prd-context.json"
-else
-  cat > "$OUT_DIR/prd-context.json" <<EOJSON
-{"branch":"$BRANCH","prd_path":"$MATCHED_PRD","worktree":$IS_WORKTREE,"timestamp":"$TIMESTAMP"}
-EOJSON
-fi
+# Call flow-state.sh prd_context set
+bash "$SCRIPT" prd_context set \
+  --branch="$BRANCH" \
+  --prd_path="$MATCHED_PRD" \
+  --worktree="$IS_WORKTREE" \
+  >/dev/null 2>&1
 
 json_ok
