@@ -69,6 +69,38 @@ if [ "$HAS_IMPLEMENTATION" = false ]; then
   allow_stop
 fi
 
+# --- pause detection (explicit + heuristic) ---
+LAST_MSG=$(echo "$INPUT" | jq -r '.last_assistant_message // ""')
+
+# Explicit: FLOW_PAUSE::<reason> signal
+if [ -n "$LAST_MSG" ]; then
+  if echo "$LAST_MSG" | grep -qE 'FLOW_PAUSE::[a-zA-Z0-9_-]+' 2>/dev/null; then
+    allow_stop
+  fi
+fi
+
+# Heuristic: count pause indicator phrases (need 2+ to trigger)
+if [ -n "$LAST_MSG" ]; then
+  PAUSE_COUNT=0
+  LOWER_MSG=$(echo "$LAST_MSG" | tr '[:upper:]' '[:lower:]')
+  for pattern in \
+    "waiting for you" "waiting on you" "waiting for your" \
+    "your confirmation" "your review" "your approval" \
+    "ready for you to" "ready for your" \
+    "let me know" \
+    "paused" "just pausing" "intentionally paused" \
+    "not done yet" "not finished yet" \
+    "before i commit" "before committing" "before i push" "before pushing" \
+    "confirm before" "review before"; do
+    if echo "$LOWER_MSG" | grep -Fq "$pattern" 2>/dev/null; then
+      PAUSE_COUNT=$((PAUSE_COUNT + 1))
+    fi
+  done
+  if [ "$PAUSE_COUNT" -ge 2 ]; then
+    allow_stop
+  fi
+fi
+
 # --- counter ---
 COUNTER_FILE="${COUNTER_DIR}/verify-counter-${SESSION_ID}"
 MAX=${FLOW_VERIFY_MAX:-5}
@@ -88,7 +120,7 @@ HAS_DONE_SIGNAL=false
 HAS_RECENT_ERRORS=false
 
 # Primary: check last_assistant_message (most reliable)
-LAST_MSG=$(echo "$INPUT" | jq -r '.last_assistant_message // ""')
+# NOTE: LAST_MSG already extracted in pause detection section above
 if [ -n "$LAST_MSG" ]; then
   # Accept exact session_id match
   if echo "$LAST_MSG" | grep -Fq "$DONE_SIGNAL" 2>/dev/null; then
@@ -175,9 +207,12 @@ Before stopping, verify ALL work is truly complete and emit the done signal:
 4. Verify implementation — tests passing, build successful, changes committed.
 
 When ALL tasks are complete, include this EXACT marker in your response (copy-paste, do NOT generate your own UUID):
-\`FLOW_DONE::${NONCE}\`"
+\`FLOW_DONE::${NONCE}\`
+
+If you are **pausing** to wait for user input (confirmation, review, etc.), use:
+\`FLOW_PAUSE::reason\` (e.g. \`FLOW_PAUSE::waiting-for-confirmation\`)"
 else
-  REASON="${FINGERPRINT} ${LABEL}: ${PREAMBLE} Include this EXACT marker: \`FLOW_DONE::${NONCE}\` [nonce=${NONCE}]"
+  REASON="${FINGERPRINT} ${LABEL}: ${PREAMBLE} Include this EXACT marker: \`FLOW_DONE::${NONCE}\` — or if pausing for user input: \`FLOW_PAUSE::reason\` [nonce=${NONCE}]"
 fi
 
 # --- output block decision ---
