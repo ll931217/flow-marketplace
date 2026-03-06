@@ -1,0 +1,18 @@
+{
+  "env": {
+    "CLAUDE_CODE_TEAMMATE_COMMAND": "~/.local/bin/claude-teammate-wrapper"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/bump-plugin-version.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
