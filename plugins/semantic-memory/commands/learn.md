@@ -65,4 +65,6 @@ This knowledge will be available in future sessions.
 
 ## Difference from /memory:add
 
-`/memory:learn` is semantically focused on teaching the agent new knowledge, while `/memory:add` is a general-purpose memory addition command. They use the same underlying implementation.
+`/memory:learn` is semantically focused on teaching the agent new knowledge, while
+`/memory:add` is a general-purpose memory addition command. They use the same
+underlying implementation.

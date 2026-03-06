@@ -23,7 +23,7 @@
     {
       "name": "semantic-memory",
       "description": "Semantic memory plugin with automatic context retrieval, preference capture, and knowledge management for Claude Code",
-      "version": "2.1.2",
+      "version": "2.1.3",
       "source": "./plugins/semantic-memory",
       "category": "productivity",
       "tags": [
