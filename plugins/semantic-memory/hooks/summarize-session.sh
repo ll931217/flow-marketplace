@@ -10,7 +10,6 @@ PROJECT_NAME=$(basename "$PWD" 2>/dev/null || echo "unknown")
 
 # Session state directory
 STATE_DIR="${TMPDIR:-/tmp}/semantic-memory"
-STATE_FILE="$STATE_DIR/session-summary.json"
 
 # Ensure state directory exists
 mkdir -p "$STATE_DIR"

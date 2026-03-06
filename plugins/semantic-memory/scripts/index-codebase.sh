@@ -72,8 +72,8 @@ request=$(cat <<EOF
 EOF
 )
 
-response=$(export DATABASE_URL="$DATABASE_URL" SEMANTIC_MEMORY_CHUNK_SIZE="$CHUNK_SIZE" && \
-           node "$MCP_SERVER_DIR/dist/index.js" <<< "$request" 2>&1 || true)
+export DATABASE_URL="$DATABASE_URL" SEMANTIC_MEMORY_CHUNK_SIZE="$CHUNK_SIZE"
+response=$(node "$MCP_SERVER_DIR/dist/index.js" <<< "$request" 2>&1 || true)
 
 # Parse result
 if echo "$response" | grep -q '"error"'; then
