@@ -152,6 +152,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Flow Plugin
 - **SessionStart:startup hook:** Converted from `type: "prompt"` to `type: "command"` with `check-pending-state.sh` — eliminates LLM call on every startup for a deterministic file check
 
+## [1.2.0] - 2026-03-09
+
+### Added
+
+#### Flow Plugin
+- **`flow:dispatch` skill** (`skills/dispatch/SKILL.md`): Smart skill router that analyzes prompt intent and project state (PRDs, beads tasks, flow phase) to silently invoke the correct skill. Routes to all flow skills and detects non-flow skills (`decision-engine`, `systematic-debugging`, `taste`, `tdd-workflow`, `security-review`, `gh:create-commit`). Fires at the start of any action-oriented task.
+
 ## [Unreleased]
 
 ### Planned Features

@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.3.0]
+
+### Added
+- **`flow:dispatch` skill**: Smart skill router that auto-invokes the right skill based on prompt intent and current project state. Analyzes PRD status, beads task count, and flow phase to route to `flow:plan`, `flow:generate-tasks`, `flow:implement`, `flow:review`, `flow:cleanup`, or `flow:autonomous`. Also detects non-flow skills (`decision-engine`, `systematic-debugging`, `taste`, `tdd-workflow`, `security-review`, `gh:create-commit`) when no flow workflow step applies. Fires at the start of any action-oriented task, silently invoking the correct skill without interruption.
+
 ## [2.2.0]
 
 ### Fixed
