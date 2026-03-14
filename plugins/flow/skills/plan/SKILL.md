@@ -1,11 +1,28 @@
 ---
 name: plan
-description: Generate a Product Requirements Document (PRD) from user requirements. Guides through prerequisites check, worktree setup, clarifying questions, PRD generation with structured templates, and approval workflow. Use when starting a new feature implementation.
+description: Generate a Product Requirements Document (PRD) from user requirements. Guides through prerequisites check, worktree setup, clarifying questions, PRD generation with structured templates, and approval workflow. Use when starting a new feature, planning an implementation, or beginning to build/create something. This skill is the foundation of the flow workflow and should be invoked whenever you need to plan before implementing.
 ---
 
 # Plan
 
 Generate a structured PRD from user requirements through an interactive workflow.
+
+## Quick Reference
+
+**Usage:** `/flow:plan`
+
+**What this does:**
+- Checks prerequisites (git required, beads/worktrunk optional)
+- Sets up an isolated worktree for the feature branch
+- Asks 3-5 clarifying questions at a time to gather requirements
+- Generates a PRD in `.flow/prd-[feature]-v1.md` with structured template
+- Gets user approval before proceeding
+
+**Prerequisites:** git installed, optionally beads (`bd`) and worktrunk (`wt`)
+
+**Next:** `/flow:generate-tasks` to create implementation tasks from approved PRD
+
+**Full workflow:** plan → generate-tasks → implement → cleanup
 
 ## Quick Start
 

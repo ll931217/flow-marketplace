@@ -1,11 +1,29 @@
 ---
 name: implement
-description: Execute implementation tasks from a generated task list. Enforces TDD test-first workflow, delegates to specialized subagents, handles parallel task groups, and manages error recovery. Use after tasks are generated from an approved PRD.
+description: Execute implementation tasks from a generated task list. Enforces TDD test-first workflow, delegates to specialized subagents, handles parallel task groups, and manages error recovery. Use after tasks are generated from an approved PRD to start implementation. This skill should be invoked when you're ready to build, implement, execute, or work on the generated tasks.
 ---
 
 # Implement
 
 Execute implementation tasks from a generated task list with TDD enforcement, subagent delegation, and parallel execution.
+
+## Quick Reference
+
+**Usage:** `/flow:implement`
+
+**What this does:**
+- Auto-discovers PRD and loads generated task list
+- Enforces TDD: write failing tests first (RED), implement until tests pass (GREEN)
+- Delegates tasks to specialized subagents based on task metadata
+- Executes parallel task groups (`[P:Group-X]`) concurrently
+- Handles error recovery with retry, alternative approaches, and rollback
+- Updates PRD status from `approved` to `implementing`
+
+**Prerequisites:** PRD must be `approved` or `implementing`, tasks must be generated
+
+**Next:** `/flow:cleanup` to finalize after all tasks are complete
+
+**Full workflow:** plan → generate-tasks → implement → cleanup
 
 ## Quick Start
 

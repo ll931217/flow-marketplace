@@ -1,11 +1,29 @@
 ---
 name: cleanup
-description: Post-implementation cleanup and finalization. Verifies all tasks are complete, runs TDD quality gate (all tests must pass), handles worktree merge, creates summary commit with conventional format, optionally generates documentation, and updates PRD status to implemented. Use after all implementation tasks are complete.
+description: Post-implementation cleanup and finalization. Verifies all tasks are complete, runs TDD quality gate (all tests must pass), handles worktree merge, creates summary commit with conventional format, optionally generates documentation, and updates PRD status to implemented. Use after all implementation tasks are complete. This skill should be invoked when you're done, finished, completed all tasks, or ready to wrap up and finalize the implementation.
 ---
 
 # Cleanup
 
 Post-implementation cleanup and finalization after all PRD tasks are complete.
+
+## Quick Reference
+
+**Usage:** `/flow:cleanup`
+
+**What this does:**
+- Verifies all tasks are complete (beads or TodoWrite)
+- Enforces TDD quality gate: ALL tests MUST pass before proceeding
+- Merges worktree to target branch (if applicable, using `wt` or git fallback)
+- Creates summary commit with conventional format (PRD reference, epic summaries)
+- Optionally generates documentation via `document-skills`
+- Updates PRD status from `implementing` to `implemented`
+
+**Prerequisites:** All PRD tasks must be complete
+
+**Next:** Feature is complete! Review the implementation summary.
+
+**Full workflow:** plan → generate-tasks → implement → cleanup
 
 ## Quick Start
 

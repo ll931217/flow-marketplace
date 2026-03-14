@@ -1,11 +1,29 @@
 ---
 name: generate-tasks
-description: Generate implementation tasks from an approved PRD. Analyzes requirements to create epics and subtasks with dependencies, priorities, and testing strategies. Detects appropriate subagent types for each task. Use after PRD is approved.
+description: Generate implementation tasks from an approved PRD. Analyzes requirements to create epics and subtasks with dependencies, priorities, and testing strategies. Detects appropriate subagent types for each task. Use after PRD is approved to break down implementation work. This skill should be invoked when you need to create tasks, break down work, or plan the implementation steps.
 ---
 
 # Generate Tasks
 
 Generate a structured task hierarchy from an approved PRD with dependency tracking, priority inheritance, and subagent assignment.
+
+## Quick Reference
+
+**Usage:** `/flow:generate-tasks`
+
+**What this does:**
+- Auto-discovers PRD matching current git context (branch/worktree)
+- Checks for existing tasks (supports PRD updates with re-generation)
+- Generates 5-7 epics with detailed subtasks and acceptance criteria
+- Analyzes file dependencies and creates parallel execution groups
+- Assigns specialized subagent types to each task
+- Selects testing strategy (Sequential, Incremental, or TDD)
+
+**Prerequisites:** PRD must exist and be in `approved` status
+
+**Next:** `/flow:implement` to execute the generated tasks
+
+**Full workflow:** plan → generate-tasks → implement → cleanup
 
 ## Quick Start
 

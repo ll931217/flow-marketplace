@@ -1,11 +1,32 @@
 ---
 name: autonomous
-description: End-to-end autonomous implementation orchestrator (Maestro). Executes the full plan, generate-tasks, implement, cleanup workflow without human intervention after initial planning approval. Makes intelligent technical decisions using the decision engine. Use for fully autonomous feature implementation.
+description: End-to-end autonomous implementation orchestrator (Maestro). Executes the full plan, generate-tasks, implement, cleanup workflow without human intervention after initial planning approval. Makes intelligent technical decisions using the decision engine. Use when you want to say "do it all", "end-to-end", "hands-off", or "fully implement" something. This skill handles everything from planning to completion automatically.
 ---
 
 # Autonomous Orchestrator (Maestro)
 
 End-to-end autonomous implementation that transforms a feature request into working code without human intervention after planning approval.
+
+## Quick Reference
+
+**Usage:** `/flow:autonomous "Implement user authentication with OAuth support"`
+
+**What this does:**
+- **Phase 1 (Interactive):** Ask clarifying questions, generate and approve PRD
+- **Phase 2 (Autonomous):** Generate epics and subtasks with dependencies
+- **Phase 3 (Autonomous):** Execute all tasks with TDD, parallel groups, subagent delegation
+- **Phase 4 (Autonomous):** Validate all tests pass, auto-recover on failures
+- **Phase 5 (Autonomous):** Merge worktree, create summary commit, update PRD status
+- **Phase 6:** Present final implementation report
+
+**Critical rules:**
+- After Phase 1 approval, NO checkpoints, NO pauses, NO confirmations
+- Uses decision engine for autonomous technical choices
+- Only stops for critical unrecoverable errors
+
+**Prerequisites:** None — starts from scratch
+
+**Full workflow:** plan → generate-tasks → implement → cleanup (all orchestrated automatically)
 
 ## Quick Start
 

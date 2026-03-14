@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.4.0]
+
+### Added
+- **`flow:summary` skill**: Full implementation for displaying current feature implementation summary. Supports PRD discovery, beads integration, TodoWrite fallback, progress tracking (X/Y tasks, grouped by epic), and multi-worktree support.
+
+### Changed
+- **Skill descriptions**: Enhanced all flow skill descriptions (autonomous, plan, generate-tasks, implement, review, cleanup) to be more "pushy" for better triggering, following skill-creator recommendations.
+- **Quick Reference sections**: Added Quick Reference sections to all flow skills containing user-facing info from corresponding command files.
+- **Commands folder eliminated**: Removed `commands/` folder - skills are now the single source of truth. All user-facing quick-reference information is integrated into each skill.
+
+### Removed
+- **`commands/` folder**: Deleted redundant command files (autonomous.md, cleanup.md, generate-tasks.md, implement.md, plan.md, review.md, summary.md). All information merged into corresponding skills.
+
 ## [2.3.0]
 
 ### Added
