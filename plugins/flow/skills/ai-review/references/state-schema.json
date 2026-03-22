@@ -1,0 +1,195 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AI Review State",
+  "type": "object",
+  "required": ["version", "run_id", "status", "current_step", "goal", "iteration", "history"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version for migration"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^run_[a-z0-9]+$",
+      "description": "Unique run identifier"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["running", "paused", "completed", "failed"],
+      "description": "Lifecycle status"
+    },
+    "current_step": {
+      "type": "string",
+      "enum": ["plan_generation", "awaiting_user", "critique", "refine", "evaluate"],
+      "description": "Active step in the loop"
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1,
+      "description": "User-provided goal"
+    },
+    "constraints": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Constraints injected into Planner prompt"
+    },
+    "plan": {
+      "type": "object",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "description"],
+            "properties": {
+              "id": {"type": "string"},
+              "description": {"type": "string"},
+              "dependencies": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "deliverables": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "assumptions": {
+          "type": "object",
+          "properties": {
+            "resolved": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "accepted": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "critical": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "summary": {"type": "string"}
+      }
+    },
+    "iteration": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Current iteration number"
+    },
+    "max_iterations": {
+      "type": "integer",
+      "default": 5,
+      "description": "Maximum allowed iterations"
+    },
+    "target_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.9,
+      "description": "Target weighted score for convergence"
+    },
+    "pending_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "question", "blocking", "reason"],
+        "properties": {
+          "id": {"type": "string"},
+          "question": {"type": "string"},
+          "blocking": {"type": "boolean"},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "user_answers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["question_id", "answer"],
+        "properties": {
+          "question_id": {"type": "string"},
+          "answer": {"type": "string"}
+        }
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["iteration", "plan_snapshot", "evaluation"],
+        "properties": {
+          "iteration": {"type": "integer"},
+          "plan_snapshot": {"type": "object"},
+          "plan_diff": {
+            "type": "object",
+            "properties": {
+              "added_steps": {"type": "array"},
+              "removed_steps": {"type": "array"},
+              "modified_steps": {"type": "array"}
+            }
+          },
+          "critiques": {"type": "array"},
+          "aggregated_critique": {"type": "object"},
+          "conflicts": {"type": "array"},
+          "evaluation": {
+            "type": "object",
+            "required": ["scores", "weightedScore"],
+            "properties": {
+              "scores": {
+                "type": "object",
+                "properties": {
+                  "correctness": {"type": "number"},
+                  "completeness": {"type": "number"},
+                  "feasibility": {"type": "number"},
+                  "clarity": {"type": "number"},
+                  "efficiency": {"type": "number"},
+                  "risk": {"type": "number"}
+                }
+              },
+              "weightedScore": {"type": "number"},
+              "blocking_issues": {"type": "array"},
+              "confidence": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "last_updated": {"type": "string", "format": "date-time"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "prompt_version": {"type": "string"},
+        "agent_versions": {
+          "type": "object",
+          "properties": {
+            "planner": {"type": "string"},
+            "critic": {"type": "string"},
+            "judge": {"type": "string"}
+          }
+        },
+        "token_usage": {
+          "type": "object",
+          "properties": {
+            "total": {"type": "integer"},
+            "by_agent": {"type": "object"}
+          }
+        },
+        "critic_weights": {
+          "type": "object",
+          "default": {"security": 1.5, "impl": 1.0, "performance": 1.0}
+        },
+        "convergence_reason": {"type": "string"}
+      }
+    },
+    "failure_reason": {
+      "type": "string",
+      "description": "Reason for failure if status is 'failed'"
+    }
+  }
+}
