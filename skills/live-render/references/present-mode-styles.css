@@ -1,0 +1,187 @@
+/* ============================================================
+   Present mode — append to theme.css
+   ============================================================ */
+
+.present-trigger {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.present-trigger:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.present-root {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.present-frame {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  overflow: hidden;
+  padding: 48px 48px 0;
+  min-height: 0;
+}
+
+.present-slide {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.present-stage {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+}
+
+.present-content {
+  width: 100%;
+  will-change: transform;
+}
+
+.present-content-inner > .section {
+  margin: 0;
+}
+
+.present-chrome {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 14px 24px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+
+.present-vdots {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border-left: 1px solid var(--border);
+  margin-left: 4px;
+}
+
+.present-vdot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.present-vdot:hover {
+  border-color: var(--accent);
+}
+
+.present-vdot.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.present-sub {
+  color: var(--accent);
+  margin: 0 2px;
+}
+
+.present-btn {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  width: 36px;
+  height: 36px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.12s ease, color 0.12s ease;
+}
+
+.present-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.present-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.present-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.present-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+}
+
+.present-dot:hover {
+  border-color: var(--accent);
+  transform: scale(1.2);
+}
+
+.present-dot.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.present-counter {
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.12em;
+  min-width: 64px;
+  text-align: center;
+}
+
+.present-exit {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.present-exit:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}

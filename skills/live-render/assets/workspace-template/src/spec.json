@@ -1,0 +1,28 @@
+{
+  "root": "root",
+  "elements": {
+    "root": {
+      "type": "Stack",
+      "props": { "direction": "vertical", "gap": "lg" },
+      "children": ["header", "body"]
+    },
+    "header": {
+      "type": "SectionHeader",
+      "props": {
+        "label": "Live Canvas",
+        "subtitle": "Start chatting — I'll illustrate concepts here as we talk."
+      },
+      "children": []
+    },
+    "body": {
+      "type": "ConceptPanel",
+      "props": {
+        "title": "Ready",
+        "description": "Ask me to explain anything. I'll build a visual right here using cards, diagrams, step-by-step walkthroughs, comparisons, and more.",
+        "badge": "Chat-Driven UI",
+        "accent": true
+      },
+      "children": []
+    }
+  }
+}
