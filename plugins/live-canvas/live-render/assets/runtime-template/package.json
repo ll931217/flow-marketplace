@@ -1,0 +1,15 @@
+{
+  "name": "live-render-workspace",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "server": "bun run server.ts",
+    "dev": "bun run --watch server.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.4.0"
+  }
+}
