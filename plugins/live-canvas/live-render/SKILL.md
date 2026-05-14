@@ -375,6 +375,106 @@ Beyond these, any other `type` falls through to the generic node renderer (so yo
 
 ---
 
+## Canvas composition — make it look designed, not generated
+
+The renderer can show beautiful, restrained diagrams. Default agent output, left alone, drifts into AI-slop visuals — emoji-encrusted cards, eight-colour rainbow palettes, no grid, no hierarchy, edges crossing in every direction. These rules are calibrated to the four built-in render paths and are **load-bearing** when you compose or mutate a canvas. Long form: [`references/canvas-design.md`](references/canvas-design.md).
+
+### Palette — three accents, max
+
+Pick one **primary** accent for the canvas's centre of mass and up to two supporting accents for adjacent clusters. Everything else uses neutral surface tones. **Never more than three accents in one world.** Colour carries semantic load — same accent = same conceptual layer.
+
+Default palette (saturated for accent strips / edges; translucent companion for region fills / edge labels):
+
+| Role      | Hex        | Translucent                |
+| --------- | ---------- | -------------------------- |
+| Primary   | `#6a8aff`  | `rgba(106,138,255,0.18)`   |
+| Secondary | `#7ec699`  | `rgba(126,198,153,0.18)`   |
+| Tertiary  | `#f3b562`  | `rgba(243,181,98,0.18)`    |
+| Warning   | `#e07b91`  | `rgba(224,123,145,0.18)`   |
+| Muted     | `#9aa3b8`  | `rgba(154,163,184,0.16)`   |
+
+Reject neon purples as primary, pure black/white surfaces, and pastel rainbow gradients. They read as slop.
+
+### Typography & copy
+
+Each node has three text slots — keep them in their lanes:
+
+- `title` — 1–4 words, noun phrase, sentence case. What the entity *is*.
+- `subtitle` — ≤ 6 words. Its type or classifier.
+- `desc` — 1–3 full sentences. Hover-only context; assume the reader already sees title + subtitle.
+
+**Banned copy:** marketing adjectives (powerful, smart, seamless, robust, modern, beautiful), emojis inside title/subtitle, all-caps titles, trailing punctuation on title/subtitle, and `desc` strings that restate the title.
+
+**Icons.** `metadata.icon` accepts one emoji. Use it only when it *classifies* the node at a glance (👁️ read, ✏️ write, 🔒 locked). Decorative chrome (🚀 ✨ 🎯 💡 🔥) is the strongest slop tell. **When in doubt, omit the icon.**
+
+### Spatial composition — the 8 px grid
+
+Snap every coordinate, width, and height to multiples of **8**. Random pixels read as noise.
+
+Node size tiers (`width × height`):
+- Standard: `220 × 64` — default.
+- Wide: `280 × 64` — long titles you can't shorten.
+- Compact: `160 × 64` — dense classifier clusters.
+- Banner: `540 × 64` — full-row items like impl-plan steps.
+
+**Within a row or column, every node uses the same width.** Height stays at 64 unless the design genuinely demands more.
+
+Regions need **≥ 24 px inner padding** around their contents and **≥ 32 px gap** to adjacent regions. They must never touch or overlap. The 1600×900 canvas has a usable area of ≈ 1536×836 — common grids:
+
+- Two columns: ~760 px each, 32 px gutter at x ≈ 800.
+- Four columns: ~370 px each, 32 px gutters.
+- Top/bottom halves: divider at y ≈ 480.
+
+### Edge discipline
+
+Edges are the loudest source of visual noise — aggressive hygiene is non-negotiable.
+
+- **Cull.** If region containment or adjacency already conveys the relationship, no edge.
+- **No crossings.** If two edges would cross, reposition nodes first.
+- **One edge per pair per direction.** Fold multiple facts into one label or move them into `desc`.
+- **Labels:** ≤ 4 words, lowercase, no punctuation. Empty string when meaning is obvious from context.
+- **Solid vs dashed:** solid = primary/structural/synchronous; dashed = derived/async-return/inheritance. Don't dash for variety.
+- **Opacity:** edges use the translucent companion (alpha 0.4–0.7). Fully saturated strokes overpower the nodes.
+- **Time-ordered flows:** prefix labels with `1.`, `2.`, … so the sequence is readable without prose.
+
+### Region composition
+
+A region is a labeled cluster — it earns its place only if its contents share one concept worth naming.
+
+- Sentence case title, ≤ 8 words, describes what's *inside*.
+- Region accent = the dominant node accent inside it.
+- One region per concept layer. **Don't nest. Don't create a region for a single node.**
+
+### Composition archetypes — pick one
+
+Mixing archetypes in one canvas is what creates incoherence. Pick the grammar that fits the intent and stick to it:
+
+1. **Concept map** — layered left-to-right by abstraction, one region per layer, edges between adjacent layers only. 1–2 accents.
+2. **Sequence / flow** — single horizontal row of actor nodes, numbered edges (`1.`, `2.`, …), solid for forward calls, dashed for returns. Tertiary accent (`#f3b562`) is the default.
+3. **Architecture diagram** — cluster by deployment unit; region per cluster; primary accent on the subject cluster, muted on context clusters. Edges only for runtime connections.
+4. **Decision / state map** — nodes are states, edges are transitions, edge labels are the condition. Warning accent for terminal failures only.
+
+### When mutating an existing canvas
+
+Read the current snapshot first and identify the existing palette and grid. **Do not introduce a fourth colour or off-grid coordinates.** New nodes inherit the local cluster's accent and width. If you must move things to make room, move them on the 8 px grid — never shave 7 px off a region to squeeze something in. Resolving an annotation is a composition act, not a free-for-all repaint.
+
+### Slop-detection checklist
+
+Before every `PATCH /api/world`, scan the patch. If any of the below is true, you are about to ship slop — fix it first:
+
+- Every node has an emoji icon "to make it pop"
+- More than 3 distinct accent colours in the world
+- Accents picked from the generic AI purple/blue/cyan trio with no semantic meaning
+- Titles read like marketing copy ("🚀 Powerful Service Engine")
+- Node widths vary at random within the same row or column
+- Regions wrap their contents with < 24 px of breathing room, or two regions touch
+- An edge crosses three other edges to reach its target
+- An edge label is longer than its source node's title
+- `desc` is empty or restates the title
+- A region exists with one node inside it
+
+---
+
 ## Open questions
 
 These are unresolved and **deliberately left unresolved**. Don't fabricate answers. When the user asks, surface them as open and ask them to choose.
@@ -395,6 +495,7 @@ These are unresolved and **deliberately left unresolved**. Don't fabricate answe
 | `references/annotation-system.md`                | Annotation entity flow, the auto-create exception, and trade-offs         |
 | `references/mutation-protocol.md`                | JSON Patch protocol, examples, and stdout log shape                       |
 | `references/architecture-decisions.md`           | Locked decisions and rejections with the reasoning behind each            |
+| `references/canvas-design.md`                    | Visual design rules — palette, typography, grid, edges, slop-detection checklist |
 | `assets/runtime-template/`                       | The Bun + Canvas2D skeleton copied into each project's workspace          |
 | `assets/runtime-template/CLAUDE.md`              | Agent instructions for the runtime workspace itself                       |
 
@@ -407,3 +508,4 @@ These are unresolved and **deliberately left unresolved**. Don't fabricate answe
 3. **Claude owns all mutations.** The annotation auto-create is the **only** exception. Resist adding more.
 4. **Stdout is the agent's eyes.** Keep log lines parseable (one JSON object per line) and sparse (only semantic events + mutation confirmations).
 5. **World state is canonical.** When in doubt, `GET /api/world`. Never trust a cached snapshot across messages.
+6. **Composition is part of the job.** A patch that places entities on a random grid with random colours is not "done." See [Canvas composition](#canvas-composition--make-it-look-designed-not-generated) — three accents max, 8 px grid, ≥ 24 px region padding, no edge crossings, no marketing copy, no emoji chrome. Run the slop-detection checklist before shipping.

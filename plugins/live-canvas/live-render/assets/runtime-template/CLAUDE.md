@@ -108,6 +108,31 @@ If you're unsure whether to act on a `user_interaction`, prefer doing nothing. T
 - **Server bypass:** Writing to anything other than `PATCH /api/world`. The server owns canonical state.
 - **Stdout flooding:** This server is sparse on purpose. If you need to chatter, do it in your own message to the user, not by logging.
 
+## Visual composition — do not ship slop
+
+Every PATCH that creates or repositions entities is a design act. The renderer can show restrained, well-composed canvases; default agent output drifts into AI-slop (emoji-encrusted cards, rainbow palettes, off-grid coordinates, crossing edges, marketing copy). Apply these rules — full version in the skill's `references/canvas-design.md`.
+
+- **Palette: three accents max.** Default primary `#6a8aff`, secondary `#7ec699`, tertiary `#f3b562`, warning `#e07b91` (sparingly), muted `#9aa3b8`. Same accent = same conceptual layer. Reject neon purples as primary; reject pastel rainbows.
+- **Copy.** `title` 1–4 words sentence case; `subtitle` ≤ 6 words; `desc` 1–3 full sentences explaining *why*. No marketing adjectives (powerful, smart, seamless, robust). No emoji in title or subtitle. No trailing punctuation on title/subtitle.
+- **Icons.** Use `metadata.icon` only when the emoji *classifies* the node (👁️ read, ✏️ write, 🔒 locked). 🚀 ✨ 🎯 💡 🔥 are the strongest slop tells — omit when in doubt.
+- **8 px grid.** Snap every x/y/width/height to multiples of 8. Standard node `220×64`; wide `280×64`; compact `160×64`; banner `540×64`. Within a row or column, **every node uses the same width**.
+- **Regions.** ≥ 24 px inner padding, ≥ 32 px gap to other regions, never touching or overlapping. Sentence-case title ≤ 8 words. One region per concept layer — don't create a region for a single node.
+- **Edges.** Cull anything that restates region containment. No crossings — reposition nodes first. One edge per pair per direction. Labels ≤ 4 words, lowercase, no punctuation, empty when obvious. Solid = structural/sync; dashed = derived/async-return/inheritance. Use translucent strokes (alpha 0.4–0.7). Number time-ordered flows (`1.`, `2.`, …).
+- **Archetype discipline.** Pick *one* of: concept map (layered by abstraction), sequence/flow (single row + numbered edges), architecture (cluster by deployment unit), state map (states + labeled transitions). Don't mix archetypes in one canvas.
+- **Mutations respect existing composition.** Read the snapshot first; new nodes inherit the local cluster's accent and width. Don't introduce a fourth colour. Don't move existing entities off-grid to make room.
+
+**Slop-detection checklist — run before every PATCH.** If any is true, fix before sending:
+
+- Every node has an emoji icon
+- More than 3 accent colours in the world
+- A title reads like marketing copy
+- Node widths vary within the same row or column
+- Two regions touch or overlap, or padding is < 24 px
+- An edge crosses three others
+- An edge label is longer than its source node's title
+- `desc` is empty or restates the title
+- A region contains only one node
+
 ## Running
 
 ```bash
