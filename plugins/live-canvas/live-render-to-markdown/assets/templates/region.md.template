@@ -1,0 +1,23 @@
+# {{region_title}}
+
+{{lede}}
+
+## Wiring
+
+```mermaid
+{{region_mermaid}}
+```
+
+## Entities
+
+{{entity_table}}
+
+{{#annotations}}
+## Annotations
+
+{{annotation_callouts}}
+{{/annotations}}
+
+---
+
+← [Back to index](./index.md)
