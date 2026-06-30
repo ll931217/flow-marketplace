@@ -194,26 +194,7 @@ fi
 # Cache-bust fingerprint: unique per session/attempt to defeat LiteLLM proxy caching
 FINGERPRINT="[session=${SESSION_ID} ts=$(date +%s) attempt=${NEXT} nonce=${NONCE}]"
 
-if [ "$NEXT" -eq 1 ]; then
-  REASON="${FINGERPRINT} ${LABEL}: ${PREAMBLE}
-
-## Task Completion Verification
-
-Before stopping, verify ALL work is truly complete and emit the done signal:
-
-1. Check TodoWrite tasks — any pending/in-progress items? Continue working.
-2. Check Beads issues — run \`bd list --status=open\` if applicable.
-3. Check Flow State — run \`flow-state.sh get\` to check current state.
-4. Verify implementation — tests passing, build successful, changes committed.
-
-When ALL tasks are complete, include this EXACT marker in your response (copy-paste, do NOT generate your own UUID):
-\`FLOW_DONE::${NONCE}\`
-
-If you are **pausing** to wait for user input (confirmation, review, etc.), use:
-\`FLOW_PAUSE::reason\` (e.g. \`FLOW_PAUSE::waiting-for-confirmation\`)"
-else
-  REASON="${FINGERPRINT} ${LABEL}: ${PREAMBLE} Include this EXACT marker: \`FLOW_DONE::${NONCE}\` — or if pausing for user input: \`FLOW_PAUSE::reason\` [nonce=${NONCE}]"
-fi
+REASON="${FINGERPRINT} ${LABEL}: ${PREAMBLE} Verify tasks/build/tests are done, then include this EXACT marker: \`FLOW_DONE::${NONCE}\` — or if pausing for user input: \`FLOW_PAUSE::reason\` [nonce=${NONCE}]"
 
 # --- output block decision ---
 jq -n --arg reason "$REASON" \
