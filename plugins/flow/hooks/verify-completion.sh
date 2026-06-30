@@ -60,7 +60,7 @@ fi
 
 # Check 2: Transcript has file-modifying tool calls
 if [ "$HAS_IMPLEMENTATION" = false ] && [ -f "$TRANSCRIPT" ]; then
-  if grep -qE '"(Write|Edit|NotebookEdit)"' "$TRANSCRIPT" 2>/dev/null; then
+  if grep -qE '"name"[[:space:]]*:[[:space:]]*"(Write|Edit|NotebookEdit)"' "$TRANSCRIPT" 2>/dev/null; then
     HAS_IMPLEMENTATION=true
   fi
 fi
