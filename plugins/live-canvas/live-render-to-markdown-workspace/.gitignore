@@ -1,4 +1,0 @@
-# Per-eval fixture copies are reproducible from fixture-project/
-iteration-*/eval-*/with_skill/project/
-iteration-*/eval-*/without_skill/project/
-node_modules/
