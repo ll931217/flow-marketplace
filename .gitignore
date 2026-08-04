@@ -79,3 +79,7 @@ temp/
 # Dolt database files (added by bd init)
 .dolt/
 .dmux/
+
+# Local tool state (leaks machine paths / session metadata)
+.brv/
+.serena/
