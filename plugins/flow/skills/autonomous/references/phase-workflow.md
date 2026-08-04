@@ -128,7 +128,7 @@ After PRD approval, save state before continuing:
 5. **SKIP** the "Wait for Go" checkpoint - proceed directly
 6. Assign priorities based on PRD frontmatter
 7. Order tasks for optimal parallel execution using the decision engine
-8. Create tasks in beads (or TodoWrite fallback)
+8. Create tasks in beads (or native task tools fallback)
 9. Update PRD frontmatter with related_issues
 
 **Log Example:**

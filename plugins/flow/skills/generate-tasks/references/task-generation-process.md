@@ -72,11 +72,11 @@ bd create --title "Epic Title" \
   --labels "epic,feature-name"
 ```
 
-### Without Beads (TodoWrite Fallback)
+### Without Beads (Native Task Tools Fallback)
 
 - Each epic is a todo item with status "pending"
 - Use naming convention: "Epic: [title]"
-- Track in TodoWrite tool state
+- Track via TaskCreate/TaskUpdate
 
 ### Generation Strategy for Updates
 
@@ -140,7 +140,7 @@ bd create --title "Implement login endpoint" \
 
 Link to parent epic using parent-child relationship. Set dependencies with `bd add-depends-on` or `bd add-blocked-by`.
 
-### Without Beads (TodoWrite Fallback)
+### Without Beads (Native Task Tools Fallback)
 
 - Name sub-tasks with parent prefix: "[Epic Title] Sub-task: specific task"
 - Status: "pending"
@@ -236,7 +236,7 @@ Explicit list of files and directories this task must NOT modify, even if they s
 - Run `bd ready` to identify unblocked tasks
 
 **Without beads:**
-- Review TodoWrite state for completeness
+- Review TaskList state for completeness
 
 ### Update PRD Metadata
 

@@ -40,9 +40,9 @@ Full-featured task tracking with dependencies, ready task detection, and persist
 - Use dependency graph for blocking detection
 - Track parallel group membership with labels
 
-### Without Beads (TodoWrite Fallback)
+### Without Beads (Native Task Tools Fallback)
 
-Basic task tracking using the internal TodoWrite tool.
+Basic task tracking using the built-in TaskCreate/TaskUpdate/TaskList tools.
 
 **Limitations:**
 - Task context may be lost between sessions
@@ -50,7 +50,7 @@ Basic task tracking using the internal TodoWrite tool.
 - Manual verification may be needed if context is lost
 
 **Workflow:**
-- Read tasks from TodoWrite state
+- Read tasks via TaskList
 - Mark tasks as completed with `[x]`
 - Manual dependency verification
 
@@ -87,7 +87,7 @@ After closing each task, check if the parent epic is now complete:
 4. Call `check_prd_completion` to see if ALL PRD tasks are done
 
 **Without beads:**
-1. After marking a TodoWrite task as completed, review all tasks under the same epic
+1. After marking a task completed via TaskUpdate, review all tasks under the same epic
 2. If all tasks completed: run full test suite
 3. If tests pass: stage changes, commit
 4. Check if all PRD tasks are complete

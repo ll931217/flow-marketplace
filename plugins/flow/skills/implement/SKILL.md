@@ -29,7 +29,7 @@ Execute implementation tasks from a generated task list with TDD enforcement, su
 
 1. **Discover PRD** - Auto-detected from git context (branch/worktree)
 2. **Verify status** - Must be `approved` or `implementing`
-3. **Load tasks** - Read task list from beads or TodoWrite
+3. **Load tasks** - Read task list from beads or the native task tools
 4. **Execute tasks** - Autonomous with specialized subagents, TDD-first
 5. **Complete** - All tests pass, PRD status updated to `implemented`
 
@@ -96,7 +96,7 @@ See [../shared/references/prd-discovery.md](../shared/references/prd-discovery.m
 The core cycle: pick a task, verify tests, implement, verify passing, mark done.
 
 See [references/task-execution-loop.md](references/task-execution-loop.md) for the full execution cycle including:
-- Beads vs TodoWrite task tracking paths
+- Beads vs native task tools task tracking paths
 - Status transitions (`open` -> `in_progress` -> `closed`)
 - PRD status updates (`approved` -> `implementing` -> `implemented`)
 - Epic completion checks and commit protocol

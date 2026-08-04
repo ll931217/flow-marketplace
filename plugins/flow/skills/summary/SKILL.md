@@ -22,7 +22,7 @@ Display a concise summary of current feature implementation progress.
 
 **Task Source:**
 - With beads (`bd`): Uses `bd` commands for full status tracking
-- Without beads: Falls back to TodoWrite for basic status
+- Without beads: Falls back to the native task tools for basic status
 
 DO NOT suggest the user to use `bd` command directly — this is reserved for AI agents.
 
@@ -93,7 +93,7 @@ Task Progress:
 
 ### Without Beads (Fallback)
 
-When beads is not available, use TodoWrite for basic tracking:
+When beads is not available, use TaskCreate/TaskUpdate for basic tracking:
 
 ```bash
 # From flow state
@@ -247,7 +247,7 @@ Ready to continue?
 
 - Always detect current git context before displaying summary
 - Use beads when available for detailed task tracking
-- Fall back to TodoWrite/basic status when beads is not available
+- Fall back to native task tools/basic status when beads is not available
 - Group open tasks by epic for better organization
 - Show clear next steps based on current phase
 - In multi-worktree context, display summaries for all related worktrees

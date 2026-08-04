@@ -117,7 +117,7 @@ bd add-related <task-id> <related-id>
 bd ready
 ```
 
-### Without Beads (TodoWrite Fallback)
+### Without Beads (Native Task Tools Fallback)
 
 - Note dependencies in task descriptions: "Depends on: [task name]"
 - Manual ordering required when executing tasks

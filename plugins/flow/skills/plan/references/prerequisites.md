@@ -9,7 +9,7 @@ Before starting PRD generation, verify that required tools are installed. Only `
 | Tool  | Check       | Installation                                                                                                                              | Required |
 | ----- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------- |
 | `git` | `which git` | Use system package manager (e.g., `sudo apt install git`, `brew install git`)                                                             | Yes      |
-| `bd`  | `which bd`  | `curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh \| bash` (optional - TodoWrite fallback available) | No       |
+| `bd`  | `which bd`  | `curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh \| bash` (optional - native task tools fallback available) | No       |
 | `wt`  | `which wt`  | `brew install max-sixty/worktrunk/wt` OR `cargo install worktrunk` (optional - git fallback available)                                    | No       |
 
 ## Tool Details
@@ -32,7 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/insta
 - Dependency tracking between tasks
 - Progress visibility
 
-**Fallback:** If `bd` is missing, the AI uses the internal `TodoWrite` tool for task tracking.
+**Fallback:** If `bd` is missing, the AI uses the built-in task tools (TaskCreate/TaskUpdate/TaskList) for task tracking.
 
 ### wt / worktrunk (Optional)
 

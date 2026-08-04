@@ -84,7 +84,7 @@ See [references/task-generation-process.md](references/task-generation-process.m
 - Sub-task detail requirements
 - Priority inheritance rules
 - PRD update detection (fresh vs existing tasks)
-- Beads vs TodoWrite storage paths
+- Beads vs native task tools storage paths
 
 ## Dependency Analysis
 
@@ -170,7 +170,7 @@ Next steps:
 
 **With beads:** Tasks stored in `.beads/` database with full dependency tracking. Use `bd ready` to find tasks with no blockers.
 
-**Without beads:** Tasks tracked via TodoWrite tool. Dependency info stored in task descriptions. Manual ordering required.
+**Without beads:** Tasks tracked via the native task tools (TaskCreate/TaskUpdate/TaskList). Dependency info stored in task descriptions. Manual ordering required.
 
 Do NOT suggest the user run `bd` commands directly. The `bd` tool is reserved for AI agents.
 

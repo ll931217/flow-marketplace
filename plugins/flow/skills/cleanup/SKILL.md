@@ -12,7 +12,7 @@ Post-implementation cleanup and finalization after all PRD tasks are complete.
 **Usage:** `/flow:cleanup`
 
 **What this does:**
-- Verifies all tasks are complete (beads or TodoWrite)
+- Verifies all tasks are complete (beads or the native task tools)
 - Enforces TDD quality gate: ALL tests MUST pass before proceeding
 - Merges worktree to target branch (if applicable, using `wt` or git fallback)
 - Creates summary commit with conventional format (PRD reference, epic summaries)
@@ -62,9 +62,9 @@ Before cleanup can proceed, all PRD tasks must be verified as complete.
 3. Verify ALL related issues have status `closed`
 4. If any issues remain open, prompt user to continue or exit
 
-**Without beads (TodoWrite fallback):**
+**Without beads (native task tools fallback):**
 
-1. Check internal TodoWrite state for all PRD-related tasks
+1. Check TaskList for all PRD-related tasks
 2. Verify all tasks have status "completed"
 3. Manual verification may be needed if context is incomplete
 
