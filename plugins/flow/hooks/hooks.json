@@ -59,8 +59,8 @@
         "matcher": "",
         "hooks": [
           {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/verify-completion.sh",
+            "type": "prompt",
+            "prompt": "The flow plugin orchestrates feature implementation (PRD -> tasks -> implement -> cleanup). Decide whether the assistant may stop. ALLOW the stop if ANY of: (1) no implementation work happened in this session (no files created or edited); (2) the final message reports completed work with verification (tasks done, build/tests passing, or explicitly no test suite applies); (3) the final message explicitly pauses for user input, review, or approval; (4) this is a short subagent transcript. BLOCK the stop only when implementation is clearly mid-flight: unresolved recent tool errors, incomplete tasks, or a final message that promises further work it has not done. When blocking, state exactly what remains: resolve the errors or finish and verify the tasks/build/tests, then plainly report completion - or explicitly pause for user input.",
             "timeout": 30
           }
         ]

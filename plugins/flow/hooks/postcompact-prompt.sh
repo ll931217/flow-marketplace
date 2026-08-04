@@ -6,6 +6,11 @@
 #
 set -u
 
+if ! command -v jq >/dev/null 2>&1; then
+  printf '{"systemMessage": "flow: jq is required for state persistence hooks but was not found on PATH - flow state will not be restored after compaction."}\n'
+  exit 0
+fi
+
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // "unknown"')
 

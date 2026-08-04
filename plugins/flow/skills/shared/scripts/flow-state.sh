@@ -125,6 +125,7 @@ cmd_set() {
   if command -v jq &>/dev/null; then
     local tmp
     tmp=$(mktemp)
+    trap 'rm -f "$tmp" "${tmp}.new"' RETURN
     cp "$STATE_FILE" "$tmp"
 
     for pair in "$@"; do
@@ -264,6 +265,7 @@ cmd_team() {
       if command -v jq &>/dev/null; then
         local tmp
         tmp=$(mktemp)
+        trap 'rm -f "$tmp"' RETURN
         jq --arg bid "$beads_id" --arg tid "$task_id" '.team_state.team_tasks[$bid] = $tid' "$effective_file" > "$tmp" && mv "$tmp" "$STATE_FILE"
       elif command -v python3 &>/dev/null; then
         python3 -c "
@@ -289,6 +291,7 @@ with open('$STATE_FILE', 'w') as f: json.dump(state, f, indent=2)
       if command -v jq &>/dev/null; then
         local tmp
         tmp=$(mktemp)
+        trap 'rm -f "$tmp"' RETURN
         jq '.team_state.groups_completed += [.team_state.current_group] | .team_state.active_team = null | .team_state.current_group = null | .team_state.team_tasks = {}' "$effective_file" > "$tmp" && mv "$tmp" "$STATE_FILE"
       elif command -v python3 &>/dev/null; then
         python3 -c "
