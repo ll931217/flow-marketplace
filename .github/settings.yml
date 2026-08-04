@@ -5,7 +5,7 @@
 repository:
   name: flow-marketplace
   description: Claude Code Plugin Marketplace hosting Flow workflow system and Semantic Memory MCP server
-  homepage: https://flow.dev
+  homepage: https://github.com/ll931217/flow-marketplace
   topics: claude-code, claude, plugin, marketplace, flow, semantic-search, mcp, pgvector
   private: false
   has_issues: true

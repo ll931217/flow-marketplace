@@ -1,43 +1,26 @@
-# Labeler Configuration
-# Automatically labels PRs based on changed files
-
+# Labeler v5 configuration - labels PRs based on changed files
 documentation:
-  - "**/*.md"
-  - "**/docs/**"
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
 
 dependencies:
-  - "package.json"
-  - "package-lock.json"
-  - "**/package.json"
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/package.json"
+          - "**/package-lock.json"
 
 ci/cd:
-  - ".github/workflows/**"
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
 
 flow-plugin:
-  - ".claude-plugin/plugins/flow/**"
+  - changed-files:
+      - any-glob-to-any-file:
+          - "plugins/flow/**"
 
 semantic-memory:
-  - ".claude-plugin/plugins/semantic-memory/**"
-
-mcp-server:
-  - ".claude-plugin/plugins/semantic-memory/mcp-server/**"
-
-bug:
-  - "**/fix/**"
-  - "**/*fix*"
-
-feature:
-  - "**/feat/**"
-  - "**/*feature*"
-
-refactor:
-  - "**/refactor/**"
-  - "**/*refactor*"
-
-tests:
-  - "**/*test*"
-  - "**/*spec*"
-
-security:
-  - "**/*security*"
-  - "**/*auth*"
+  - changed-files:
+      - any-glob-to-any-file:
+          - "plugins/semantic-memory/**"

@@ -2,7 +2,7 @@ version: 2
 updates:
   # Dependencies for the Semantic Memory MCP Server
   - package-ecosystem: "npm"
-    directory: "/.claude-plugin/plugins/semantic-memory/mcp-server"
+    directory: "/plugins/semantic-memory"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -13,14 +13,6 @@ updates:
       include: "scope"
     labels:
       - "dependencies"
-      - "npm"
-    ignore:
-      # Allow patch and minor updates automatically
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch", "version-update:semver-minor"]
-      # Require manual review for major updates
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -33,14 +25,3 @@ updates:
       include: "scope"
     labels:
       - "dependencies"
-      - "github-actions"
-
-  # Python dependencies (for embedding script - future)
-  # - package-ecosystem: "pip"
-  #   directory: "/"
-  #   schedule:
-  #     interval: "weekly"
-  #     day: "monday"
-  #   labels:
-  #     - "dependencies"
-  #     - "python"
