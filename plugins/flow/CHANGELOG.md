@@ -1,5 +1,34 @@
 # Changelog
 
+## [2.5.0]
+
+### Added
+- `.claude-plugin/plugin.json` manifest - flow previously had none; it is the
+  plugin spec's version authority and is now auto-synced by the repo's
+  version-bump hook
+- `flow:dispatch` routes plan/design/PRD review requests to `ai-review`
+  (previously absent from the routing table despite keyword overlap with
+  `flow:review`)
+
+### Changed
+- **Stop-hook completion gate**: bash `verify-completion.sh` replaced by a
+  native prompt-type Stop hook. The old gate accepted any
+  `FLOW_DONE::<anything>` string, reducing it to a magic-string check; the
+  prompt hook applies the same criteria (implementation detected, verified
+  completion, explicit pause, subagent skip) as an actual judgment
+- **decision-engine**: rewritten prompt-only - the documented helper scripts
+  (`analyze_dependencies.py`, `detect_patterns.py`, `parse_beads_deps.py`)
+  never existed; context gathering now uses standard tools (dependency
+  manifests, grep, `bd dep tree`)
+- TodoWrite fallback references replaced with the native task tools
+  (TaskCreate/TaskUpdate/TaskList) across 9 skill files
+- `ai-review` paths fixed from the pre-plugin `~/.agents/skills/` layout to
+  `${FLOW_PLUGIN_ROOT}`
+
+### Fixed
+- pre/postcompact hooks degrade loudly instead of crashing when `jq` is missing
+- `flow-state.sh` temp files cleaned via RETURN trap when jq fails mid-update
+
 ## [2.4.0]
 
 ### Added

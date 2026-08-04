@@ -1,0 +1,17 @@
+{
+  "name": "flow",
+  "version": "2.5.0",
+  "description": "Complete PRD-based workflow system with autonomous orchestration for Claude Code",
+  "author": {
+    "name": "Liang-Shih Lin",
+    "email": "liangshihlin@gmail.com"
+  },
+  "repository": "https://github.com/ll931217/flow-marketplace",
+  "license": "MIT",
+  "keywords": [
+    "prd",
+    "workflow",
+    "orchestration",
+    "planning"
+  ]
+}

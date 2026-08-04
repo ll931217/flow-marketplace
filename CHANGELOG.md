@@ -5,6 +5,28 @@ All notable changes to the Flow Marketplace will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Per-plugin changes live in each plugin's own CHANGELOG (`plugins/flow/CHANGELOG.md`);
+this file tracks marketplace-level changes.
+
+## 2026-08-04 - Repository overhaul
+
+### Fixed
+- **Release pipeline**: `release.yml`, `dependabot.yml`, CODEOWNERS, and the
+  labeler still referenced the old nested `.claude-plugin/plugins/*/mcp-server`
+  layout - releases built nothing and dependabot never opened a PR
+- **semantic-memory installs**: `dist/` and `package-lock.json` are now
+  committed; fresh marketplace installs previously got a dead MCP server
+- Version drift: flow gained a plugin.json; the version-bump hook now syncs
+  plugin.json alongside marketplace.json and package.json
+
+### Removed
+- `plugins/live-canvas` eval workspace (never a registered plugin; mostly
+  benchmark run outputs)
+- Tracked local tool state (`.brv/`, `.dolt/sql-server.info`) and a
+  runtime-generated test MCP config that had captured a local DB URL
+- Fictional `flow-community` org boilerplate (funding, security contacts,
+  code owners)
+
 ## [1.0.0] - 2025-01-18
 
 ### Added
@@ -172,4 +194,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[1.0.0]: https://github.com/flow-community/flow-marketplace/releases/tag/v1.0.0
+[1.0.0]: https://github.com/ll931217/flow-marketplace/releases/tag/v1.0.0
