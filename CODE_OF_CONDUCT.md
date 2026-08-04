@@ -51,8 +51,8 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement at:
-- Email: conduct@flow.dev
-- GitHub: @flow-community
+- GitHub: open an issue or contact the maintainer directly
+- Maintainer: @ll931217
 
 All complaints will be reviewed and investigated promptly and fairly.
 

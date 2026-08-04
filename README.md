@@ -64,10 +64,9 @@ Or through Claude Code:
 
 **Semantic Memory Plugin:**
 
-- Install script runs automatically
-- npm dependencies are installed
-- TypeScript server is built
-- Environment template is created (`.env.example`)
+- Ships prebuilt (`dist/` is committed) - no build step on install
+- Requires a running PostgreSQL with pgvector; copy `.env.example` and
+  set `SEMANTIC_MEMORY_PG_URL`
 
 ### Manual Prerequisites
 
@@ -255,13 +254,7 @@ For detailed protocol documentation, see `plugins/flow/skills/shared/references/
 
 ### Semantic Memory Plugin
 
-Index your codebase:
-
-```bash
-.claude-plugin/plugins/semantic-memory/scripts/index-codebase.sh /path/to/project
-```
-
-Or use the MCP tool directly:
+Index your codebase with the MCP tool:
 
 ```
 index_project project_path="/path/to/project"
@@ -287,42 +280,21 @@ flow-marketplace/
 │   └── marketplace.json           # Marketplace manifest
 ├── plugins/
 │   ├── flow/                      # Flow plugin
-│   │   ├── commands/              # Thin command wrappers (~20 lines each)
-│   │   │   ├── plan.md
-│   │   │   ├── generate-tasks.md
-│   │   │   ├── implement.md
-│   │   │   ├── autonomous.md
-│   │   │   ├── cleanup.md
-│   │   │   └── summary.md
-│   │   ├── skills/                # Skills with on-demand references
-│   │   │   ├── plan/              # PRD generation workflow
-│   │   │   │   ├── SKILL.md
-│   │   │   │   └── references/    # prerequisites, worktree, questions, template
-│   │   │   ├── generate-tasks/    # Task generation from PRD
-│   │   │   │   ├── SKILL.md
-│   │   │   │   └── references/    # task process, deps, testing, subagents
-│   │   │   ├── implement/         # Task execution with TDD
-│   │   │   │   ├── SKILL.md
-│   │   │   │   └── references/    # execution loop, parallel, delegation, errors
-│   │   │   ├── autonomous/        # Maestro orchestrator
-│   │   │   │   ├── SKILL.md
-│   │   │   │   └── references/    # phases, decisions, recovery, config, report
-│   │   │   ├── cleanup/           # Post-implementation cleanup
-│   │   │   │   ├── SKILL.md
-│   │   │   │   └── references/    # merge, tests, commits, docs
-│   │   │   ├── decision-engine/   # Autonomous technical decisions
-│   │   │   │   ├── SKILL.md
-│   │   │   │   └── references/    # rubric, patterns, ordering
-│   │   │   └── shared/            # Cross-skill protocols
-│   │   │       └── references/    # prd-discovery, tdd, state, compaction, autonomous-mode
-│   │   ├── hooks/
-│   │   │   └── hooks.json         # SessionStart, PreCompact, Stop hooks
-│   │   └── subagent-types.yaml    # Agent type mapping
-│   └── semantic-memory-mcp/       # Semantic memory MCP plugin
-│       ├── mcp-server/
-│       │   ├── src/
-│       │   └── package.json
-│       └── scripts/
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json
+│   │   ├── skills/                # plan, generate-tasks, implement, autonomous,
+│   │   │                          # review, ai-review, cleanup, summary, dispatch,
+│   │   │                          # decision-engine, shared (each with references/)
+│   │   ├── hooks/                 # hooks.json + SessionStart/PreCompact/Stop scripts
+│   │   └── docs/
+│   └── semantic-memory/           # Semantic memory MCP plugin
+│       ├── .claude-plugin/
+│       │   └── plugin.json
+│       ├── src/                   # TypeScript MCP server source
+│       ├── dist/                  # Prebuilt server (committed - installs run this)
+│       ├── skills/  commands/  hooks/  scripts/  tests/
+│       └── .mcp.json              # MCP server registration
+├── scripts/                       # Repo tooling (teammate wrapper)
 ├── README.md
 └── CHANGELOG.md
 ```
@@ -332,9 +304,11 @@ flow-marketplace/
 ### Building the Semantic Memory MCP Server
 
 ```bash
-cd .claude-plugin/plugins/semantic-memory/mcp-server
+cd plugins/semantic-memory
 npm run build
 ```
+
+Commit the refreshed `dist/` with your change - installs run the committed build.
 
 ### Running in Development Mode
 

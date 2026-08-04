@@ -83,3 +83,6 @@ temp/
 # Local tool state (leaks machine paths / session metadata)
 .brv/
 .serena/
+
+# Generated at runtime by test-with-claude.sh - contains the local DB URL
+plugins/semantic-memory/test-mcp-config.json

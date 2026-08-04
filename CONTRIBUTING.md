@@ -34,7 +34,7 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 3. Add upstream remote:
    ```bash
-   git remote add upstream https://github.com/flow-community/flow-marketplace
+   git remote add upstream https://github.com/ll931217/flow-marketplace
    ```
 
 ## Development Setup

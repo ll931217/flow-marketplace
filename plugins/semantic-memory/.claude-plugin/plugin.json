@@ -1,6 +1,6 @@
 {
   "name": "semantic-memory",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Semantic memory plugin with automatic context retrieval and preference capture for Claude Code",
   "author": {
     "name": "Liang-Shih Lin",
