@@ -166,21 +166,17 @@ Task D: Modify tests/auth.test.ts → parallel with src/ files
 
 ## Integration with Beads
 
-Parse beads dependency graph:
+Read the dependency graph directly from beads:
 
-```python
-# Using parse_beads_deps.py script
-graph = parse_beads_deps()
-
-# Get execution order
-order = topological_sort(graph)
-
-# Get parallel groups
-groups = graph["parallel_groups"]
-
-# Get foundational tasks
-foundational = graph["foundational"]
+```bash
+bd list --json          # blocked_by relations for every issue
+bd dep tree <issue-id>  # visualize one issue's dependency chain
 ```
+
+From the `blocked_by` relations derive:
+- **Execution order** - topological sort (an issue runs after everything it is blocked by)
+- **Foundational tasks** - issues with no `blocked_by` entries
+- **Parallel groups** - issues at the same depth with no edges between them
 
 ## Decision Examples
 

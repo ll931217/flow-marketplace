@@ -45,6 +45,7 @@ Work through this decision tree top-to-bottom. First match wins.
 | `current_phase == "implementing"` or `IN_PROGRESS > 0` | `flow:implement` |
 | `current_phase == "approved"` or (`APPROVED_PRD` exists and `OPEN_TASKS == 0`) | `flow:generate-tasks` |
 | `OPEN_TASKS > 0` and prompt signals implementation intent ("implement", "start", "continue", "work on", "go", "build") | `flow:implement` |
+| Prompt asks to review/critique a plan, design, or PRD - not code ("review the plan", "critique this design", "adversarial review", "multi-model review") | `ai-review` |
 | Prompt contains "review", "audit", "check code", "quality", "code review" | `flow:review` |
 | Prompt contains "cleanup", "wrap up", "done", "finished", "close out", "all tasks done" | `flow:cleanup` |
 | `ALL_PRDS` not empty and user wants to revise or reprioritize | `flow:plan` |

@@ -281,7 +281,7 @@ Need to add behavior dynamically?
 
 Before selecting a pattern:
 
-1. **Detect existing patterns** - Use `scripts/detect_patterns.py`
+1. **Detect existing patterns** - Grep for pattern signatures (`middleware`, `Repository`, `Service`, etc.) and skim a few hits to confirm the convention in use
 2. **Match to context** - What patterns are already used?
 3. **Follow conventions** - Prefer existing patterns over new ones
 4. **Consider complexity** - Don't over-engineer simple features

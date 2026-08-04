@@ -90,47 +90,24 @@ Output: {
 }
 ```
 
-## Scripts
+## Gathering Context
 
-### `scripts/analyze_dependencies.py`
+No helper scripts - gather decision inputs directly with standard tools:
 
-Scans project for existing dependencies to inform tech decisions.
+**Existing dependencies** (tech-stack decisions):
+- Read the dependency manifests present at the project root: `package.json`,
+  `requirements.txt`/`pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, etc.
+- Note lockfiles to distinguish direct vs transitive dependencies.
 
-```bash
-# Usage
-python3 scripts/analyze_dependencies.py <project-root>
+**Existing patterns** (architecture decisions):
+- Grep for the pattern's signature (e.g. `middleware`, `Repository`, `Service`)
+  and skim 2-3 hits to confirm the convention actually in use.
+- Prefer following what the codebase already does over introducing a new pattern.
 
-# Output
-{
-  "package_managers": ["npm", "pip"],
-  "existing_deps": {
-    "express": "^4.18.0",
-    "passport": "^0.6.0"
-  }
-}
-```
-
-### `scripts/detect_patterns.py`
-
-Grep codebase for existing architectural patterns.
-
-```bash
-# Usage
-python3 scripts/detect_patterns.py <project-root> <pattern-type>
-
-# Pattern types: middleware, service-layer, repository, factory, etc.
-```
-
-### `scripts/parse_beads_deps.py`
-
-Parses beads dependency graph for task ordering.
-
-```bash
-# Usage
-python3 scripts/parse_beads_deps.py
-
-# Output: Dependency graph ready for topological sort
-```
+**Task dependencies** (ordering decisions):
+- With beads: `bd dep tree <issue-id>` / `bd list --json` and build the order
+  from `blocked_by` relations.
+- Without beads: use the dependency notes in each task description.
 
 ## Reference Documentation
 
@@ -168,13 +145,8 @@ The decision engine is invoked by Maestro during:
 2. **Task execution** - Before each task, make technical decisions
 3. **Dependency resolution** - When generating task order
 
-Example integration:
-```python
-# In Maestro orchestrator
-decision = query_decision_engine("Need database for user sessions")
-tech_choice = decision["output"]["decision"]
-# Use tech_choice in task generation
-```
+Maestro invokes this skill at those points and uses the structured JSON
+decision (see Output Schema) to drive task generation and execution order.
 
 ## Principles
 

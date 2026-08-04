@@ -182,10 +182,11 @@ python3 scripts/orchestrator.py resume --run-id $RUN_ID --answers answers.json
 # Skill auto-triggers and orchestrates
 
 # In SKILL.md context, call:
+import os
 import subprocess
 result = subprocess.run([
     "python3",
-    "~/.agents/skills/ai-review/scripts/orchestrator.py",
+    os.path.expandvars("${FLOW_PLUGIN_ROOT}/skills/ai-review/scripts/orchestrator.py"),
     "start",
     "--goal", "Design a user authentication system with OAuth2, MFA, and session management"
 ], capture_output=True)
@@ -215,7 +216,7 @@ python3 scripts/orchestrator.py resume \
 ## File Structure
 
 ```
-~/.agents/skills/ai-review/
+${FLOW_PLUGIN_ROOT}/skills/ai-review/
 ├── SKILL.md                      # This file
 ├── agents/
 │   ├── planner.md                # Planner agent prompt
@@ -251,7 +252,7 @@ python3 scripts/orchestrator.py resume \
 
 ```bash
 # Install dependencies with uv
-cd ~/.agents/skills/ai-review
+cd "${FLOW_PLUGIN_ROOT}/skills/ai-review"
 uv sync
 ```
 
