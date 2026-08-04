@@ -1,6 +1,6 @@
 {
   "env": {
-    "CLAUDE_CODE_TEAMMATE_COMMAND": "~/.local/bin/claude-teammate-wrapper"
+    "CLAUDE_CODE_TEAMMATE_COMMAND": "/home/liangshih.lin/.local/bin/claude-teammate-wrapper"
   },
   "hooks": {
     "PreToolUse": [
