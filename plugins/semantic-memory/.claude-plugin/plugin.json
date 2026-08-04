@@ -1,12 +1,12 @@
 {
   "name": "semantic-memory",
-  "version": "2.1.1",
+  "version": "2.1.3",
   "description": "Semantic memory plugin with automatic context retrieval and preference capture for Claude Code",
   "author": {
-    "name": "flow-community",
-    "url": "https://github.com/flow-marketplace"
+    "name": "Liang-Shih Lin",
+    "email": "liangshihlin@gmail.com"
   },
-  "repository": "https://github.com/flow-marketplace/semantic-memory",
+  "repository": "https://github.com/ll931217/flow-marketplace",
   "license": "MIT",
   "keywords": [
     "semantic-memory",
@@ -15,97 +15,5 @@
     "knowledge-management",
     "mcp",
     "pgvector"
-  ],
-  "commands": [
-    {
-      "name": "memory:add",
-      "description": "Add a memory entry to semantic memory",
-      "file": "commands/add.md"
-    },
-    {
-      "name": "memory:search",
-      "description": "Search memories semantically",
-      "file": "commands/search.md"
-    },
-    {
-      "name": "memory:list",
-      "description": "List memories with filters",
-      "file": "commands/list.md"
-    },
-    {
-      "name": "memory:delete",
-      "description": "Delete a memory or clear dataset",
-      "file": "commands/delete.md"
-    },
-    {
-      "name": "memory:sync",
-      "description": "Sync project codebase to semantic index",
-      "file": "commands/sync.md"
-    },
-    {
-      "name": "memory:learn",
-      "description": "Explicitly teach the agent knowledge",
-      "file": "commands/learn.md"
-    }
-  ],
-  "skills": [
-    {
-      "name": "memory-context",
-      "description": "Retrieve and format semantic memory context",
-      "path": "skills/memory-context"
-    },
-    {
-      "name": "preferences",
-      "description": "Interactive user preference setup",
-      "path": "skills/preferences"
-    },
-    {
-      "name": "project-setup",
-      "description": "Project context capture",
-      "path": "skills/project-setup"
-    },
-    {
-      "name": "session-summary",
-      "description": "Session end summary and learning capture",
-      "path": "skills/session-summary"
-    }
-  ],
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/retrieve-context.sh \"${CLAUDE_USER_PROMPT}\"",
-            "timeout": 15
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "## Session Summary - Capture Learnings\n\nAnalyze this session and identify learnings to save to semantic memory:\n\n### What was implemented or changed?\nReview the files modified and actions taken.\n\n### What decisions were made?\n- Technology choices\n- Pattern selections\n- Architecture decisions\n- Conventions established\n\n### Capture-worthy learnings:\n1. User preferences (save to 'user' dataset)\n2. Project-specific knowledge (save to current project dataset)\n3. Temporary session context (save to 'session' dataset)\n\nIf significant learnings were found, present them to the user and ask if they want to save them to memory.\n\nUse the memory_add MCP tool to save any approved learnings.",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "## Semantic Memory Initialization\n\n1. Check if user preferences exist in memory:\n   - Use memory_list MCP tool with dataset='user'\n   - If no preferences found, suggest: \"No user preferences found. Run /memory:preferences to set up your coding preferences.\"\n\n2. Detect current project:\n   - Get project name from working directory\n   - Check if project knowledge exists using memory_list with dataset='{project_name}'\n   - If no project knowledge, suggest: \"No project knowledge found for {project_name}. Run /memory:project-setup to capture project context.\"\n\n3. IMPORTANT: Be brief and non-intrusive. Only show suggestions if memories are missing.",
-            "timeout": 15
-          }
-        ]
-      }
-    ]
-  }
+  ]
 }

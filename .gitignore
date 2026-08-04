@@ -3,14 +3,24 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 yarn.lock
 
 # TypeScript
 *.tsbuildinfo
 dist/
+# semantic-memory ships prebuilt - marketplace installs are plain git clones
+# with no install step, so dist/ must be committed
+!plugins/semantic-memory/dist/
 build/
 *.d.ts.map
+
+# Compiled test artifacts (tests are excluded from tsc build; these are stale IDE/ad-hoc output)
+plugins/semantic-memory/tests/**/*.js
+plugins/semantic-memory/tests/**/*.js.map
+plugins/semantic-memory/tests/**/*.d.ts
+plugins/semantic-memory/vitest.config.js
+plugins/semantic-memory/vitest.config.d.ts
+plugins/semantic-memory/vitest.config.js.map
 
 # Environment variables
 .env

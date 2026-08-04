@@ -100,40 +100,28 @@ describe('Skills E2E', () => {
       expect(existsSync(pluginPath)).toBe(true);
     });
 
-    it('should register all commands in plugin.json', () => {
-      const pluginPath = join(process.cwd(), '.claude-plugin', 'plugin.json');
-      const content = readFileSync(pluginPath, 'utf-8');
-      const plugin = JSON.parse(content);
-
-      const commandNames = plugin.components.commands.map((c: { name: string }) => c.name);
-
-      expect(commandNames).toContain('memory:add');
-      expect(commandNames).toContain('memory:search');
-      expect(commandNames).toContain('memory:list');
-      expect(commandNames).toContain('memory:delete');
-      expect(commandNames).toContain('memory:sync');
-      expect(commandNames).toContain('memory:learn');
+    // Commands, skills, and hooks are auto-discovered from their directories,
+    // not registered in plugin.json - assert the files themselves exist.
+    it('should have all command files', () => {
+      const commandsDir = join(process.cwd(), 'commands');
+      for (const cmd of ['add', 'search', 'list', 'delete', 'sync', 'learn']) {
+        expect(existsSync(join(commandsDir, `${cmd}.md`)), `commands/${cmd}.md`).toBe(true);
+      }
     });
 
-    it('should register all skills in plugin.json', () => {
-      const pluginPath = join(process.cwd(), '.claude-plugin', 'plugin.json');
-      const content = readFileSync(pluginPath, 'utf-8');
-      const plugin = JSON.parse(content);
-
-      const skillNames = plugin.components.skills.map((s: { name: string }) => s.name);
-
-      expect(skillNames).toContain('memory-context');
-      expect(skillNames).toContain('preferences');
-      expect(skillNames).toContain('project-setup');
-      expect(skillNames).toContain('session-summary');
+    it('should have all skill directories', () => {
+      for (const { path } of requiredSkills) {
+        expect(existsSync(join(skillsDir, path)), `skills/${path}`).toBe(true);
+      }
     });
 
-    it('should reference hooks configuration', () => {
-      const pluginPath = join(process.cwd(), '.claude-plugin', 'plugin.json');
-      const content = readFileSync(pluginPath, 'utf-8');
-      const plugin = JSON.parse(content);
+    it('should have hooks configuration', () => {
+      const hooksPath = join(process.cwd(), 'hooks', 'hooks.json');
+      const hooks = JSON.parse(readFileSync(hooksPath, 'utf-8'));
 
-      expect(plugin.components.hooks).toHaveProperty('config', 'hooks/hooks.json');
+      expect(hooks.hooks).toHaveProperty('UserPromptSubmit');
+      expect(hooks.hooks).toHaveProperty('Stop');
+      expect(hooks.hooks).toHaveProperty('SessionStart');
     });
   });
 });
