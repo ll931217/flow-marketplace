@@ -25,10 +25,11 @@ REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || { echo '{}'; exit 0; }
 MARKETPLACE="${REPO_ROOT}/.claude-plugin/marketplace.json"
 [ -f "$MARKETPLACE" ] || { echo '{}'; exit 0; }
 
-# Get staged files (exclude marketplace.json and package.json to avoid loops)
+# Get staged files (exclude version-bearing files to avoid loops)
 STAGED=$(git diff --cached --name-only 2>/dev/null \
   | grep -v '.claude-plugin/marketplace.json' \
-  | grep -v 'package\.json$' || true)
+  | grep -v 'package\.json$' \
+  | grep -v '.claude-plugin/plugin\.json$' || true)
 [ -z "$STAGED" ] && { echo '{}'; exit 0; }
 
 PLUGIN_COUNT=$(jq '.plugins | length' "$MARKETPLACE")
@@ -56,6 +57,14 @@ for i in $(seq 0 $((PLUGIN_COUNT - 1))); do
       jq --arg ver "$NEW_VERSION" '.version = $ver' "$PKG" > "${PKG}.tmp" \
         && mv "${PKG}.tmp" "$PKG"
       git add "$PKG"
+    fi
+
+    # Keep the plugin manifest (the spec's version authority) in sync
+    MANIFEST="${REPO_ROOT}/${SOURCE_DIR}/.claude-plugin/plugin.json"
+    if [ -f "$MANIFEST" ]; then
+      jq --arg ver "$NEW_VERSION" '.version = $ver' "$MANIFEST" > "${MANIFEST}.tmp" \
+        && mv "${MANIFEST}.tmp" "$MANIFEST"
+      git add "$MANIFEST"
     fi
 
     git add "$MARKETPLACE"
