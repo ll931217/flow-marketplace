@@ -75,17 +75,14 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install pnpm
-        run: npm install -g pnpm
-
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Type Check
-        run: pnpm exec tsc --noEmit
+        run: npx tsc --noEmit
 
       - name: Build
-        run: pnpm run build
+        run: npm run build
 
       - name: Verify Build Output
         run: |
@@ -163,12 +160,9 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Run pnpm audit
+      - name: Run npm audit
         working-directory: plugins/semantic-memory
-        run: pnpm audit --audit-level moderate
+        run: npm audit --audit-level moderate
         continue-on-error: true
 
   verify-structure:
