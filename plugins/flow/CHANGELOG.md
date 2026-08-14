@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.6.0]
+## [2.6.1]
 
 ### Added
 - **`flow:slave-away` skill**: unattended backlog grinder. Where `flow:autonomous`
