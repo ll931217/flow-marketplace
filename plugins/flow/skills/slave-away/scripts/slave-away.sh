@@ -21,13 +21,16 @@
 #
 set -euo pipefail
 
-die() { echo "slave-away: $*" >&2; exit 1; }
+die() {
+  echo "slave-away: $*" >&2
+  exit 1
+}
 
 command -v jq >/dev/null || die "jq is required"
 command -v bd >/dev/null || die "bd (beads) is required"
 
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || die "not inside a git repository"
-BASE_DIR="$PROJECT_ROOT/.flow/slave-away"
+BASE_DIR="$PROJECT_ROOT/.flow/state/slave-away"
 CURRENT_FILE="$BASE_DIR/current"
 
 timestamp() { date -u +%Y-%m-%dT%H:%M:%SZ; }
@@ -35,29 +38,32 @@ epoch_of() { date -u -d "$1" +%s 2>/dev/null || echo 0; }
 
 ensure_gitignored() {
   git -C "$PROJECT_ROOT" check-ignore -q "$BASE_DIR" 2>/dev/null && return 0
-  printf '\n# flow:slave-away run state\n.flow/slave-away/\n' >> "$PROJECT_ROOT/.gitignore"
+  printf '\n# flow:slave-away run state\n.flow/state/slave-away/\n' >>"$PROJECT_ROOT/.gitignore"
 }
 
 run_dir() {
   [[ -f "$CURRENT_FILE" ]] || die "no run in flight — run 'slave-away.sh init' first"
-  local id; id=$(cat "$CURRENT_FILE")
+  local id
+  id=$(cat "$CURRENT_FILE")
   local d="$BASE_DIR/$id"
   [[ -d "$d" ]] || die "run '$id' is registered but $d is missing"
   echo "$d"
 }
 
-RUN_JSON()   { echo "$(run_dir)/run.json"; }
-JOURNAL()    { echo "$(run_dir)/journal.jsonl"; }
-DEFERRED()   { echo "$(run_dir)/deferred.jsonl"; }
+RUN_JSON() { echo "$(run_dir)/run.json"; }
+JOURNAL() { echo "$(run_dir)/journal.jsonl"; }
+DEFERRED() { echo "$(run_dir)/deferred.jsonl"; }
 
 # Parse --key=value args into shell vars named ARG_<key> (dashes -> underscores).
 parse_args() {
   for arg in "$@"; do
     case "$arg" in
-      --*=*)
-        local k="${arg%%=*}"; k="${k#--}"; k="${k//-/_}"
-        printf -v "ARG_${k}" '%s' "${arg#*=}"
-        ;;
+    --*=*)
+      local k="${arg%%=*}"
+      k="${k#--}"
+      k="${k//-/_}"
+      printf -v "ARG_${k}" '%s' "${arg#*=}"
+      ;;
     esac
   done
 }
@@ -67,7 +73,8 @@ parse_args() {
 bd_json() {
   local out rc
   set +e
-  out=$(bd "$@" --json 2>&1); rc=$?
+  out=$(bd "$@" --json 2>&1)
+  rc=$?
   set -e
   if [[ $rc -ne 0 ]]; then
     echo "slave-away: 'bd $* --json' failed (exit $rc):" >&2
@@ -96,11 +103,13 @@ cmd_preflight() {
     echo "ok    beads reachable"
   fi
 
-  local branch; branch=$(git -C "$PROJECT_ROOT" rev-parse --abbrev-ref HEAD)
+  local branch
+  branch=$(git -C "$PROJECT_ROOT" rev-parse --abbrev-ref HEAD)
   case "$branch" in
-    main|master|develop|release/*)
-      echo "WARN  on protected branch '$branch' — isolate into a worktree before grinding" ;;
-    *) echo "ok    branch '$branch'" ;;
+  main | master | develop | release/*)
+    echo "WARN  on protected branch '$branch' — isolate into a worktree before grinding"
+    ;;
+  *) echo "ok    branch '$branch'" ;;
   esac
 
   if [[ -n "$(git -C "$PROJECT_ROOT" status --porcelain)" ]]; then
@@ -120,10 +129,11 @@ cmd_preflight() {
 
 cmd_init() {
   local ARG_run_id="" ARG_isolation="worktree" ARG_worktree="" \
-        ARG_priority="" ARG_label="" ARG_only=""
+    ARG_priority="" ARG_label="" ARG_only=""
   parse_args "$@"
 
-  mkdir -p "$BASE_DIR"; ensure_gitignored
+  mkdir -p "$BASE_DIR"
+  ensure_gitignored
 
   if [[ -f "$CURRENT_FILE" ]]; then
     echo "Run already in flight: $(cat "$CURRENT_FILE") — resuming (init is a no-op)"
@@ -133,12 +143,14 @@ cmd_init() {
   # Fail loud rather than recording an empty base commit — the report's diff range
   # and every "what did this run change" answer depend on it.
   local base_commit
-  base_commit=$(git -C "$PROJECT_ROOT" rev-parse HEAD 2>/dev/null) \
-    || die "HEAD does not resolve (empty repository?) — commit something before grinding"
+  base_commit=$(git -C "$PROJECT_ROOT" rev-parse HEAD 2>/dev/null) ||
+    die "HEAD does not resolve (empty repository?) — commit something before grinding"
 
   local id="${ARG_run_id:-$(date -u +%Y%m%d-%H%M%S)}"
   local d="$BASE_DIR/$id"
-  mkdir -p "$d"; : > "$d/journal.jsonl"; : > "$d/deferred.jsonl"
+  mkdir -p "$d"
+  : >"$d/journal.jsonl"
+  : >"$d/deferred.jsonl"
 
   jq -n \
     --arg run_id "$id" \
@@ -165,9 +177,9 @@ cmd_init() {
         max_attempts: 3, max_consecutive_failures: 3, max_iterations: 50,
         max_wall_clock_seconds: 14400, max_no_progress_ticks: 2
       }
-    }' > "$d/run.json"
+    }' >"$d/run.json"
 
-  echo "$id" > "$CURRENT_FILE"
+  echo "$id" >"$CURRENT_FILE"
   echo "Run initialized: $id  ($d)"
 }
 
@@ -176,12 +188,13 @@ cmd_gates() {
   shift
   local ARG_test="" ARG_lint="" ARG_typecheck=""
   parse_args "$@"
-  local f; f=$(RUN_JSON)
+  local f
+  f=$(RUN_JSON)
   jq --arg t "$ARG_test" --arg l "$ARG_lint" --arg c "$ARG_typecheck" '
     .gates.test      = (if $t == "" then .gates.test      else $t end) |
     .gates.lint      = (if $l == "" then .gates.lint      else $l end) |
     .gates.typecheck = (if $c == "" then .gates.typecheck else $c end)
-  ' "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+  ' "$f" >"$f.tmp" && mv "$f.tmp" "$f"
   jq -c '.gates' "$f"
 }
 
@@ -189,7 +202,8 @@ cmd_gates() {
 
 # Apply the run's scope filter to a bead array.
 scope_filter() {
-  local run; run=$(cat "$(RUN_JSON)")
+  local run
+  run=$(cat "$(RUN_JSON)")
   jq -c --argjson scope "$(echo "$run" | jq -c '.scope')" '
       (if $scope.priority == null then .
        else map(. as $i | select($scope.priority | index(($i.priority // 2) | tostring) != null)) end)
@@ -239,14 +253,21 @@ consecutive_failures() {
 }
 
 cmd_tick() {
-  local f; f=$(RUN_JSON)
-  local run; run=$(cat "$f")
-  local q; q=$(cmd_queue)
+  local f
+  f=$(RUN_JSON)
+  local run
+  run=$(cat "$f")
+  local q
+  q=$(cmd_queue)
 
-  local closed; closed=$(closed_count)
-  local last_closed; last_closed=$(echo "$run" | jq -r '.last_closed_count')
-  local no_prog; no_prog=$(echo "$run" | jq -r '.no_progress_ticks')
-  local terminal; terminal=$(echo "$q" | jq -r '.terminal')
+  local closed
+  closed=$(closed_count)
+  local last_closed
+  last_closed=$(echo "$run" | jq -r '.last_closed_count')
+  local no_prog
+  no_prog=$(echo "$run" | jq -r '.no_progress_ticks')
+  local terminal
+  terminal=$(echo "$q" | jq -r '.terminal')
 
   if [[ "$closed" -gt "$last_closed" ]]; then no_prog=0; else no_prog=$((no_prog + 1)); fi
   # A drained queue is finished, not stalled — don't let it trip the no-progress breaker.
@@ -254,11 +275,11 @@ cmd_tick() {
 
   local started elapsed
   started=$(echo "$run" | jq -r '.started_at')
-  elapsed=$(( $(date -u +%s) - $(epoch_of "$started") ))
+  elapsed=$(($(date -u +%s) - $(epoch_of "$started")))
 
   jq --argjson closed "$closed" --argjson np "$no_prog" \
-     '.iteration += 1 | .last_closed_count = $closed | .no_progress_ticks = $np' \
-     "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+    '.iteration += 1 | .last_closed_count = $closed | .no_progress_ticks = $np' \
+    "$f" >"$f.tmp" && mv "$f.tmp" "$f"
 
   jq -n \
     --argjson run "$(cat "$f")" \
@@ -306,16 +327,17 @@ If every honest answer is nothing, pass --discovered=none."
   fi
 
   jq -nc --arg ts "$(timestamp)" --arg type "$ARG_type" --arg bead "$ARG_bead" \
-         --arg commit "$ARG_commit" --arg msg "$ARG_msg" --arg disc "$ARG_discovered" \
+    --arg commit "$ARG_commit" --arg msg "$ARG_msg" --arg disc "$ARG_discovered" \
     '{ts: $ts, type: $type}
      + (if $bead   == "" then {} else {bead: $bead}     end)
      + (if $commit == "" then {} else {commit: $commit} end)
      + (if $msg    == "" then {} else {msg: $msg}       end)
-     + (if $disc   == "" then {} else {discovered: $disc} end)' >> "$(JOURNAL)"
+     + (if $disc   == "" then {} else {discovered: $disc} end)' >>"$(JOURNAL)"
 }
 
 cmd_attempts() {
-  local bead="${1:-}"; [[ -n "$bead" ]] || die "usage: slave-away.sh attempts <bead-id>"
+  local bead="${1:-}"
+  [[ -n "$bead" ]] || die "usage: slave-away.sh attempts <bead-id>"
   jq -s --arg b "$bead" '[.[] | select(.bead == $b and .type == "failed")] | length' "$(JOURNAL)"
 }
 
@@ -325,11 +347,11 @@ cmd_defer() {
   local ARG_bead="" ARG_command="" ARG_why="" ARG_effect="" ARG_verify=""
   parse_args "$@"
   [[ -n "$ARG_command" ]] || die "defer requires --command="
-  [[ -n "$ARG_why"     ]] || die "defer requires --why= (a deferred action with no reason is unactionable)"
+  [[ -n "$ARG_why" ]] || die "defer requires --why= (a deferred action with no reason is unactionable)"
   jq -nc --arg ts "$(timestamp)" --arg bead "$ARG_bead" --arg command "$ARG_command" \
-         --arg why "$ARG_why" --arg effect "$ARG_effect" --arg verify "$ARG_verify" \
+    --arg why "$ARG_why" --arg effect "$ARG_effect" --arg verify "$ARG_verify" \
     '{ts: $ts, bead: $bead, command: $command, why: $why, effect: $effect, verify: $verify}' \
-    >> "$(DEFERRED)"
+    >>"$(DEFERRED)"
   cmd_log --type=deferred --bead="$ARG_bead" --msg="$ARG_command"
   echo "Deferred action recorded for ${ARG_bead:-<no bead>}"
 }
@@ -339,19 +361,22 @@ cmd_defer() {
 cmd_status() { jq -c . "$(RUN_JSON)"; }
 
 cmd_report() {
-  local run; run=$(cat "$(RUN_JSON)")
-  local d; d=$(run_dir)
+  local run
+  run=$(cat "$(RUN_JSON)")
+  local d
+  d=$(run_dir)
   local started elapsed
   started=$(echo "$run" | jq -r '.started_at')
-  elapsed=$(( $(date -u +%s) - $(epoch_of "$started") ))
+  elapsed=$(($(date -u +%s) - $(epoch_of "$started")))
 
   echo "# Slave Away — run $(echo "$run" | jq -r '.run_id')"
   echo
   printf 'Started %s · ran %dh %dm · branch `%s`\n' \
-    "$started" $((elapsed/3600)) $(((elapsed%3600)/60)) "$(echo "$run" | jq -r '.branch')"
+    "$started" $((elapsed / 3600)) $(((elapsed % 3600) / 60)) "$(echo "$run" | jq -r '.branch')"
   echo
 
-  local ndef; ndef=$(wc -l < "$d/deferred.jsonl" | tr -d ' ')
+  local ndef
+  ndef=$(wc -l <"$d/deferred.jsonl" | tr -d ' ')
   if [[ "$ndef" -gt 0 ]]; then
     echo "## ⚠ Deferred actions — $ndef command(s) for you to run"
     echo
@@ -404,7 +429,8 @@ cmd_report() {
   # blank row -- silence here reads as "verified" when nothing was actually run.
   local any_gate=0
   for g in test lint typecheck; do
-    local cmd; cmd=$(echo "$run" | jq -r ".gates.$g // empty")
+    local cmd
+    cmd=$(echo "$run" | jq -r ".gates.$g // empty")
     if [[ -n "$cmd" ]]; then
       echo "- **$g**: \`$cmd\` — re-run this and record the result before presenting"
       any_gate=1
@@ -429,15 +455,48 @@ cmd_report() {
 # --- dispatch --------------------------------------------------------------
 
 case "${1:-}" in
-  preflight) shift; cmd_preflight "$@" ;;
-  init)      shift; cmd_init "$@" ;;
-  gates)     shift; cmd_gates "$@" ;;
-  queue)     shift; cmd_queue "$@" ;;
-  tick)      shift; cmd_tick "$@" ;;
-  log)       shift; cmd_log "$@" ;;
-  defer)     shift; cmd_defer "$@" ;;
-  attempts)  shift; cmd_attempts "$@" ;;
-  status)    shift; cmd_status "$@" ;;
-  report)    shift; cmd_report "$@" ;;
-  *) sed -n '2,30p' "$0"; exit 1 ;;
+preflight)
+  shift
+  cmd_preflight "$@"
+  ;;
+init)
+  shift
+  cmd_init "$@"
+  ;;
+gates)
+  shift
+  cmd_gates "$@"
+  ;;
+queue)
+  shift
+  cmd_queue "$@"
+  ;;
+tick)
+  shift
+  cmd_tick "$@"
+  ;;
+log)
+  shift
+  cmd_log "$@"
+  ;;
+defer)
+  shift
+  cmd_defer "$@"
+  ;;
+attempts)
+  shift
+  cmd_attempts "$@"
+  ;;
+status)
+  shift
+  cmd_status "$@"
+  ;;
+report)
+  shift
+  cmd_report "$@"
+  ;;
+*)
+  sed -n '2,30p' "$0"
+  exit 1
+  ;;
 esac
