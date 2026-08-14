@@ -29,6 +29,14 @@ SESSION_FILE="$STATE_DIR/session.json"
 
 ensure_dir() {
   mkdir -p "$STATE_DIR"
+  ensure_gitignored
+}
+
+# Add .flow/state/ to repo .gitignore unless git already ignores it
+ensure_gitignored() {
+  [[ -n "${PROJECT_ROOT:-}" ]] || return 0
+  git -C "$PROJECT_ROOT" check-ignore -q "$STATE_DIR" 2>/dev/null && return 0
+  printf '\n# flow session state\n.flow/state/\n' >> "$PROJECT_ROOT/.gitignore"
 }
 
 # Read-fallback: check new location first, then legacy TMPDIR
