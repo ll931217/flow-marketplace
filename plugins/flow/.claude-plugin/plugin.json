@@ -1,6 +1,6 @@
 {
   "name": "flow",
-  "version": "2.5.0",
+  "version": "2.6.1",
   "description": "Complete PRD-based workflow system with autonomous orchestration for Claude Code",
   "author": {
     "name": "Liang-Shih Lin",
