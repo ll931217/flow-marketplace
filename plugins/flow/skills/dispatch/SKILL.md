@@ -41,6 +41,8 @@ Work through this decision tree top-to-bottom. First match wins.
 
 | Condition | Route to |
 |-----------|---------|
+| Prompt contains "backlog", "clear the queue", "work through the open beads", "until the queue is empty", "unattended", "keep going until everything is closed", "slave away" | `flow:slave-away` |
+| `OPEN_TASKS > 0`, no PRD in play, and the ask is to work the existing issues rather than plan a feature | `flow:slave-away` |
 | Prompt contains "autonomous", "end-to-end", "do it all", "hands-off", "fully implement" | `flow:autonomous` |
 | `current_phase == "implementing"` or `IN_PROGRESS > 0` | `flow:implement` |
 | `current_phase == "approved"` or (`APPROVED_PRD` exists and `OPEN_TASKS == 0`) | `flow:generate-tasks` |

@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.6.0]
+
+### Added
+- **`flow:slave-away` skill**: unattended backlog grinder. Where `flow:autonomous`
+  starts from a feature idea and ends when that feature ships, slave-away starts from
+  whatever is open in `bd` and ends when the queue is drained. Per iteration it picks
+  the next ready bead, enriches thin beads until they are self-sufficient (writing the
+  found context back into the bead rather than asking the user), implements TDD-first,
+  runs the repo's real gates, commits one reviewable unit per bead, and closes it.
+  Work the agent discovers mid-run is filed as a linked bead and joins the same queue,
+  so the loop is not bounded by what a human filed.
+  - Runs in its own `wt`/git worktree; commits per bead; never pushes
+  - Destructive and outward-facing actions (push, MR, prod DB, deploy, secrets, shared
+    env mutation) are forbidden and instead recorded as deferred actions, presented at
+    the top of the final report as copy-pasteable commands with why/effect/verify
+  - Circuit breakers (per-bead attempts, consecutive failures, iterations, wall clock,
+    no-progress ticks) so an unattended run can lose honestly instead of spinning
+  - Run state on disk (`.flow/slave-away/<run-id>/`) so `/loop` re-entry survives
+    compaction and session death
+  - `scripts/slave-away.sh` owns the non-judgment state: queue reads, terminal
+    condition, attempt counts, journal, deferred records, report rendering. Fails loud
+    on any `bd` error so a broken database can never be read as an empty queue
+  - `log --type=closed` requires `--discovered=<ids|none>` — the discovery checklist is
+    enforced by the script rather than asked for in prose, because benchmarking showed
+    prose-only checklists are skipped 100% of the time
+  - `evals/` ships the benchmark harness: `make_fixture.sh` builds a sandbox repo with a
+    seeded beads queue containing four traps (well-specified bead, empty-description
+    bead, production-DB bead, undecidable bead) plus a bare git remote that proves
+    nothing was pushed; `grade.py` scores 14 assertions mechanically
+- `flow:dispatch` routes backlog/queue-draining prompts to `flow:slave-away`
+
 ## [2.5.0]
 
 ### Added

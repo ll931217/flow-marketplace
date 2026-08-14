@@ -22,6 +22,7 @@ Complete PRD-based workflow system with autonomous orchestration for Claude Code
 - `/flow:generate-tasks` - Generate implementation tasks from PRDs (beads-based)
 - `/flow:implement` - Manage task implementation with parallel agent delegation
 - `/flow:autonomous` - Full autonomous orchestration from PRD to completion
+- `/flow:slave-away` - Unattended backlog grinder: drains the open beads queue until empty
 - `/flow:cleanup` - Clean up after implementation (commits, PRD updates)
 - `/flow:summary` - Show current feature implementation summary
 - Decision-engine skill for autonomous technical decisions
@@ -210,6 +211,7 @@ draft → approved → implementing → implemented
 | Command | Purpose | PRD Status | Output |
 |---------|---------|------------|--------|
 | `/flow:autonomous` | End-to-end autonomous | N/A | Complete feature |
+| `/flow:slave-away` | Drain the beads backlog | N/A | Commits + deferred-action report |
 | `/flow:plan` | Create/update PRD | Any | PRD file |
 | `/flow:generate-tasks` | Generate tasks | approved | Epics + tasks |
 | `/flow:implement` | Execute tasks | approved→implementing | Code + commits |
