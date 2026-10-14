@@ -31,7 +31,7 @@
   "author": "flow-community",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "pg": "^8.23.0"
   },
   "devDependencies": {
